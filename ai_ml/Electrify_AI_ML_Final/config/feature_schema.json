@@ -1,0 +1,136 @@
+{
+  "identifier": {
+    "name": "CONS_NO",
+    "dtype": "string",
+    "model_feature": false
+  },
+  "target_columns": {
+    "excluded": [
+      "FLAG",
+      "CHK_STATE"
+    ]
+  },
+  "feature_count": 24,
+  "features": [
+    {
+      "name": "observed_days",
+      "dtype": "float",
+      "nullable": true
+    },
+    {
+      "name": "missing_days",
+      "dtype": "float",
+      "nullable": true
+    },
+    {
+      "name": "missing_ratio",
+      "dtype": "float",
+      "nullable": true
+    },
+    {
+      "name": "zero_days",
+      "dtype": "float",
+      "nullable": true
+    },
+    {
+      "name": "zero_ratio_observed",
+      "dtype": "float",
+      "nullable": true
+    },
+    {
+      "name": "mean_consumption",
+      "dtype": "float",
+      "nullable": true
+    },
+    {
+      "name": "median_consumption",
+      "dtype": "float",
+      "nullable": true
+    },
+    {
+      "name": "std_consumption",
+      "dtype": "float",
+      "nullable": true
+    },
+    {
+      "name": "min_consumption",
+      "dtype": "float",
+      "nullable": true
+    },
+    {
+      "name": "max_consumption",
+      "dtype": "float",
+      "nullable": true
+    },
+    {
+      "name": "p25_consumption",
+      "dtype": "float",
+      "nullable": true
+    },
+    {
+      "name": "p75_consumption",
+      "dtype": "float",
+      "nullable": true
+    },
+    {
+      "name": "p90_consumption",
+      "dtype": "float",
+      "nullable": true
+    },
+    {
+      "name": "iqr_consumption",
+      "dtype": "float",
+      "nullable": true
+    },
+    {
+      "name": "cv_consumption",
+      "dtype": "float",
+      "nullable": true
+    },
+    {
+      "name": "recent_30d_mean",
+      "dtype": "float",
+      "nullable": true
+    },
+    {
+      "name": "recent_vs_prior_30d_ratio",
+      "dtype": "float",
+      "nullable": true
+    },
+    {
+      "name": "recent_change",
+      "dtype": "float",
+      "nullable": true
+    },
+    {
+      "name": "first_quarter_mean",
+      "dtype": "float",
+      "nullable": true
+    },
+    {
+      "name": "last_quarter_mean",
+      "dtype": "float",
+      "nullable": true
+    },
+    {
+      "name": "long_run_change",
+      "dtype": "float",
+      "nullable": true
+    },
+    {
+      "name": "consumption_trend_slope",
+      "dtype": "float",
+      "nullable": true
+    },
+    {
+      "name": "recent_30d_zero_days",
+      "dtype": "float",
+      "nullable": true
+    },
+    {
+      "name": "recent_30d_missing_days",
+      "dtype": "float",
+      "nullable": true
+    }
+  ]
+}

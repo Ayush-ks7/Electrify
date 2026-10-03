@@ -1,0 +1,68 @@
+📄 .env.example
+📄 .gitignore
+📄 API_SPEC.md
+📄 CODEX_HANDOFF.md
+📄 Dockerfile
+📄 HANDOFF_NOTE.md
+📄 INTEGRATION_GUIDE.md
+📄 README.md
+📁 artifacts
+  📄 artifact_checksums.json
+  📄 calibration_assessment.json
+  📄 dataset_B_post_lock_robustness.json
+  📄 feature_reference_medians_train_only.json
+  📄 final_test_summary.json
+  📄 global_permutation_importance.csv
+  📄 model_card.md
+  📄 test_permutation_importance.csv
+📁 config
+  📄 defaults.json
+  📄 feature_schema.json
+  📄 model_metadata.json
+📁 docs
+  📄 API_SPEC.md
+  📄 FEATURE_ENGINEERING_SPEC.md
+  📄 INTEGRATION_GUIDE.md
+  📄 SETUP.md
+  📄 VALIDATION_REPORT.md
+📁 models
+  📄 electrify_final_model.joblib
+📄 pyproject.toml
+📁 reports
+  📄 FINAL_TREE.txt
+  📄 api_smoke_results.json
+  📄 final_verification.json
+  📄 test_run.txt
+📄 requirements.txt
+📁 sample_data
+  📄 sample_feature_request.json
+  📄 sample_feature_response.json
+  📄 sample_history_request.json
+  📄 sample_history_response.json
+📁 scripts
+  📄 build_features.py
+  📄 check_feature_parity.py
+  📄 retrain_locked_model.py
+  📄 validate_package.py
+📁 src
+  📁 electrify_ai_ml
+    📄 __init__.py
+    📄 api.py
+    📄 cleaning.py
+    📄 config.py
+    📄 constants.py
+    📄 exceptions.py
+    📄 explain.py
+    📄 feature_engineering.py
+    📄 logging_utils.py
+    📄 model.py
+    📄 service.py
+📁 tests
+  📄 test_api.py
+  📄 test_feature_engineering.py
+  📄 test_model_and_service.py
+📁 training
+  📄 AI_ML_PROVENANCE.md
+  📄 model_selection_note.json
+  📄 recommended_feature_shortlist.json
+  📄 split_manifest.json

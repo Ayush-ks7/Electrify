@@ -1,0 +1,16 @@
+{
+  "raw_oof": {
+    "roc_auc": 0.7981188228017476,
+    "pr_auc": 0.348035902313619,
+    "brier": 0.15351082170605207
+  },
+  "sigmoid_calibrated_oof": {
+    "roc_auc": 0.8006371780485143,
+    "pr_auc": 0.350819875537476,
+    "brier": 0.06614857837215703
+  },
+  "selection_rule": "Choose calibration by lower OOF Brier score on training data; sigmoid retained.",
+  "threshold_rule": "Use OOF F1-maximizing threshold as default screening threshold until field costs/inspection capacity are supplied.",
+  "f1_threshold": 0.2010437721624017,
+  "oof_f1_at_threshold": 0.3881869867340493
+}

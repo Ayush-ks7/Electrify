@@ -1,0 +1,52 @@
+{
+  "model_version": "electrify-task7-locked-v1",
+  "scope": "Full-history consumer classification",
+  "results": [
+    {
+      "CONS_NO": "SAMPLE_CONSUMER_001",
+      "predicted_probability": 0.006988161870628062,
+      "screening_threshold": 0.2010437721624017,
+      "screening_flag": false,
+      "status": "below_screening_threshold",
+      "data_quality": {
+        "observed_days": 87,
+        "missing_days": 3,
+        "missing_ratio": 0.03333333333333333
+      },
+      "explanation": {
+        "method": "leave-one-feature-out median replacement sensitivity",
+        "top_signals": [
+          {
+            "feature": "std_consumption",
+            "value": 0.7890037894248962,
+            "reference_value": 3.2731335,
+            "probability_sensitivity": -0.01358047875210626,
+            "direction": "decreases_risk",
+            "description": "standard deviation of consumption"
+          },
+          {
+            "feature": "missing_days",
+            "value": 3.0,
+            "reference_value": 113.0,
+            "probability_sensitivity": -0.007357144099656685,
+            "direction": "decreases_risk",
+            "description": "number of days without a recorded consumption value"
+          },
+          {
+            "feature": "max_consumption",
+            "value": 5.099999904632568,
+            "reference_value": 23.0,
+            "probability_sensitivity": -0.007039974196455476,
+            "direction": "decreases_risk",
+            "description": "maximum observed consumption"
+          }
+        ],
+        "note": "Sensitivity is model-specific, not causal attribution and not proof of theft."
+      }
+    }
+  ],
+  "disclaimer": "Model-generated risk prioritization only; not proof of theft and not a basis for automatic punitive action.",
+  "history_warnings": [
+    "SAMPLE_CONSUMER_001: supplied history spans 90 calendar days; the locked model was trained on 1034 calendar positions."
+  ]
+}
