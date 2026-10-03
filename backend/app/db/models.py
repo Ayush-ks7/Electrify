@@ -37,3 +37,26 @@ class Prediction(Base):
     period_end: Mapped[date | None] = mapped_column(Date)
     # Immutable snapshot includes quality, explanation, warnings, threshold and disclaimer.
     score: Mapped[dict] = mapped_column(JSON)
+
+
+class SimulationStream(Base):
+    __tablename__ = "simulation_streams"
+    consumer_id: Mapped[str] = mapped_column(ForeignKey("consumers.consumer_id"), primary_key=True)
+    config: Mapped[dict] = mapped_column(JSON)
+
+
+class MeterReading(Base):
+    __tablename__ = "meter_readings"
+    __table_args__ = (Index("ix_meter_consumer_latest", "consumer_id", "id"),)
+    id: Mapped[int] = mapped_column(primary_key=True)
+    consumer_id: Mapped[str] = mapped_column(ForeignKey("consumers.consumer_id"))
+    timestamp: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    received_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now)
+    signals: Mapped[dict] = mapped_column(JSON)
+
+
+class Investigation(Base):
+    __tablename__ = "investigations"
+    consumer_id: Mapped[str] = mapped_column(ForeignKey("consumers.consumer_id"), primary_key=True)
+    status: Mapped[str] = mapped_column(String(32), default="Requires Review")
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now)

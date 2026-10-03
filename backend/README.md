@@ -1,5 +1,7 @@
 # Electrify Backend v1
 
+**Virtual IoT extension:** see [Simulation Mode](../docs/SIMULATION_MODE.md) for the integrated simulator, unified investigations, endpoints and limitations. Restart with one backend worker. Default auto-create adds the new tables; managed databases use Alembic revision `0002`. The original v1 documentation below describes the foundation this extension reuses.
+
 FastAPI REST service backed by SQLAlchemy and the existing in-process
 `electrify_ai_ml.service.RiskService`. The locked model, feature definitions,
 threshold logic, and explanations remain in `../ai_ml/Electrify_AI_ML_Final/`.

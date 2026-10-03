@@ -1,3 +1,4 @@
+import { useDirectory } from './live';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   dashboardService,
@@ -8,7 +9,6 @@ import {
   dataQualityService,
   systemService,
   notificationService,
-  searchService,
 } from '../services';
 import { AlertStatus } from '../types';
 
@@ -259,10 +259,15 @@ export const useNotifications = () => {
   };
 };
 
-export const useGlobalSearch = (query: string) => {
-  return useQuery({
-    queryKey: ['search', query],
-    queryFn: () => searchService.searchAll(query),
-    enabled: Boolean(query && query.trim().length >= 2),
-  });
+// Search the shared backend directory locally; keystrokes do not issue new requests.
+export const useGlobalSearch = (query: string, enabled = true) => {
+  const directory = useDirectory(enabled && query.trim().length >= 2);
+  const q = query.trim().toLowerCase();
+  return {
+    ...directory,
+    data: q.length < 2 ? [] : (directory.data ?? []).filter(c => c.id.toLowerCase().includes(q)).slice(0, 50).map(c => ({
+      id: c.id, title: c.id, subtitle: 'Stored consumer', category: 'consumer' as const,
+      url: '/consumers/' + encodeURIComponent(c.id),
+    })),
+  };
 };

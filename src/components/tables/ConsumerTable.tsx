@@ -1,21 +1,24 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Consumer } from '../../types';
-import { StatusBadge } from '../common/StatusBadge';
-import { RiskIndicator } from '../common/RiskIndicator';
-import { formatTimestamp, formatKwh } from '../../utils/formatters';
+import type { ConsumerSummary } from '../../types/api';
+import { probabilityLabel, reviewLabel, scoreFor } from '../../utils/liveData';
+import { formatTimestamp } from '../../utils/formatters';
 import { ChevronRight, ArrowUpDown, ChevronLeft } from 'lucide-react';
 import { cn } from '../../utils/classNames';
 
 export interface ConsumerTableProps {
-  consumers: Consumer[];
+  consumers: ConsumerSummary[];
   isLoading?: boolean;
   className?: string;
 }
 
-export type ConsumerSortField = 'id' | 'name' | 'meter' | 'usage' | 'risk' | 'anomaly' | 'updated';
+export type ConsumerSortField = 'id' | 'risk' | 'updated';
 
-export function ConsumerTable({ consumers, isLoading, className }: ConsumerTableProps) {
+export function ConsumerTable({
+  consumers,
+  isLoading,
+  className,
+}: ConsumerTableProps) {
   const navigate = useNavigate();
   const [sortField, setSortField] = useState<ConsumerSortField>('risk');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
@@ -35,64 +38,53 @@ export function ConsumerTable({ consumers, isLoading, className }: ConsumerTable
     let comparison = 0;
     if (sortField === 'id') {
       comparison = a.id.localeCompare(b.id);
-    } else if (sortField === 'name') {
-      comparison = a.name.localeCompare(b.name);
-    } else if (sortField === 'meter') {
-      comparison = a.meterId.localeCompare(b.meterId);
-    } else if (sortField === 'usage') {
-      comparison = a.consumption.current - b.consumption.current;
     } else if (sortField === 'risk') {
-      comparison = a.risk.score - b.risk.score;
-    } else if (sortField === 'anomaly') {
-      comparison = a.anomaly.score - b.anomaly.score;
+      comparison =
+        (scoreFor(a.risk)?.predicted_probability ?? -1) -
+        (scoreFor(b.risk)?.predicted_probability ?? -1);
     } else if (sortField === 'updated') {
-      comparison = new Date(a.updatedAt).getTime() - new Date(b.updatedAt).getTime();
+      comparison =
+        new Date(a.risk?.created_at ?? a.createdAt).getTime() -
+        new Date(b.risk?.created_at ?? b.createdAt).getTime();
     }
     return sortDirection === 'asc' ? comparison : -comparison;
   });
 
   const totalPages = Math.ceil(sortedConsumers.length / pageSize) || 1;
-  const paginatedConsumers = sortedConsumers.slice((page - 1) * pageSize, page * pageSize);
+  const currentPage = Math.min(page, totalPages);
+  const paginatedConsumers = sortedConsumers.slice(
+    (currentPage - 1) * pageSize,
+    currentPage * pageSize,
+  );
 
   return (
-    <div className={cn('bg-white border border-slate-200 rounded-md overflow-hidden', className)}>
+    <div
+      className={cn(
+        'bg-white border border-slate-200 rounded-md overflow-hidden',
+        className,
+      )}
+    >
       <div className="overflow-x-auto">
         <table className="w-full text-left border-collapse text-xs">
           <thead>
             <tr className="border-b border-slate-200 bg-slate-50/80 text-slate-600 font-semibold uppercase tracking-wider text-[11px]">
               <th
                 className="py-3 px-4 cursor-pointer hover:text-slate-900 select-none"
-                onClick={() => handleSort('name')}
+                onClick={() => handleSort('id')}
               >
                 <div className="flex items-center gap-1">
                   Consumer
                   <ArrowUpDown className="w-3 h-3 text-slate-400" />
                 </div>
               </th>
-              <th
-                className="py-3 px-4 cursor-pointer hover:text-slate-900 select-none"
-                onClick={() => handleSort('meter')}
-              >
-                <div className="flex items-center gap-1">
-                  Meter
-                  <ArrowUpDown className="w-3 h-3 text-slate-400" />
-                </div>
-              </th>
-              <th
-                className="py-3 px-4 cursor-pointer hover:text-slate-900 select-none"
-                onClick={() => handleSort('usage')}
-              >
-                <div className="flex items-center gap-1">
-                  Usage
-                  <ArrowUpDown className="w-3 h-3 text-slate-400" />
-                </div>
-              </th>
+              <th className="py-3 px-4">Meter</th>
+              <th className="py-3 px-4">Usage</th>
               <th
                 className="py-3 px-4 cursor-pointer hover:text-slate-900 select-none"
                 onClick={() => handleSort('risk')}
               >
                 <div className="flex items-center gap-1">
-                  Risk
+                  Probability
                   <ArrowUpDown className="w-3 h-3 text-slate-400" />
                 </div>
               </th>
@@ -129,59 +121,48 @@ export function ConsumerTable({ consumers, isLoading, className }: ConsumerTable
               paginatedConsumers.map((c) => (
                 <tr
                   key={c.id}
-                  onClick={() => navigate(`/consumers/${c.id}`)}
+                  onClick={() =>
+                    navigate(`/consumers/${encodeURIComponent(c.id)}`)
+                  }
                   className="hover:bg-slate-50 cursor-pointer transition-colors group"
                 >
                   {/* Consumer Name + ID */}
                   <td className="py-3 px-4">
                     <div className="font-semibold text-slate-900 group-hover:text-[#0F52BA] transition-colors">
-                      {c.name}
+                      {c.id}
                     </div>
                     <div className="text-[11px] text-slate-500 font-mono">
-                      {c.id} • {c.substation}
+                      Stored consumer
                     </div>
                   </td>
 
                   {/* Meter ID + Tariff */}
                   <td className="py-3 px-4">
-                    <div className="font-mono font-medium text-slate-900">{c.meterId}</div>
-                    <div className="text-[11px] text-slate-500">{c.tariffType}</div>
-                  </td>
-
-                  {/* Usage */}
-                  <td className="py-3 px-4">
-                    <div className="font-mono font-bold text-slate-900">
-                      {formatKwh(c.consumption.current)}
+                    <div className="font-mono font-medium text-slate-900">
+                      Unavailable
                     </div>
-                    <div className="text-[11px] text-slate-500 font-mono">
-                      {c.metrics.baselineDeviationPct < 0 ? (
-                        <span className="text-red-600 font-medium">
-                          {c.metrics.baselineDeviationPct}% vs base
-                        </span>
-                      ) : (
-                        <span>+{c.metrics.baselineDeviationPct}% vs base</span>
-                      )}
+                    <div className="text-[11px] text-slate-500">
+                      No meter metadata
                     </div>
                   </td>
 
-                  {/* Risk + Anomaly Score */}
-                  <td className="py-3 px-4">
-                    <div className="flex items-center gap-2">
-                      <RiskIndicator score={c.risk.score} severity={c.risk.severity} size="sm" />
-                      <span className="text-[11px] font-mono text-slate-500">
-                        ({(c.anomaly.score * 100).toFixed(0)}% anom)
-                      </span>
-                    </div>
+                  <td className="py-3 px-4 text-slate-500">View history</td>
+                  <td className="py-3 px-4 font-mono">
+                    {c.riskError
+                      ? 'Unavailable'
+                      : probabilityLabel(
+                          scoreFor(c.risk)?.predicted_probability,
+                        )}
                   </td>
-
-                  {/* Status */}
                   <td className="py-3 px-4">
-                    <StatusBadge status={c.status} size="sm" />
+                    <span className="text-[11px] px-2 py-1 rounded border border-slate-200 bg-slate-50">
+                      {c.riskError ? 'Risk unavailable' : reviewLabel(c.risk)}
+                    </span>
                   </td>
 
                   {/* Updated */}
                   <td className="py-3 px-4 text-slate-500 font-mono text-[11px]">
-                    {formatTimestamp(c.updatedAt)}
+                    {formatTimestamp(c.risk?.created_at ?? c.createdAt)}
                   </td>
 
                   {/* Action arrow */}
@@ -200,11 +181,13 @@ export function ConsumerTable({ consumers, isLoading, className }: ConsumerTable
         <div>
           Showing{' '}
           <span className="font-mono font-bold text-slate-900">
-            {paginatedConsumers.length > 0 ? (page - 1) * pageSize + 1 : 0}
+            {paginatedConsumers.length > 0
+              ? (currentPage - 1) * pageSize + 1
+              : 0}
           </span>{' '}
           to{' '}
           <span className="font-mono font-bold text-slate-900">
-            {Math.min(page * pageSize, sortedConsumers.length)}
+            {Math.min(currentPage * pageSize, sortedConsumers.length)}
           </span>{' '}
           of{' '}
           <span className="font-mono font-bold text-slate-900">
@@ -215,18 +198,18 @@ export function ConsumerTable({ consumers, isLoading, className }: ConsumerTable
 
         <div className="flex items-center gap-1.5">
           <button
-            onClick={() => setPage((p) => Math.max(1, p - 1))}
-            disabled={page === 1}
+            onClick={() => setPage(Math.max(1, currentPage - 1))}
+            disabled={currentPage === 1}
             className="p-1 rounded border border-slate-200 bg-white hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed"
           >
             <ChevronLeft className="w-4 h-4" />
           </button>
           <span className="px-2 font-mono text-xs font-medium">
-            Page {page} of {totalPages}
+            Page {currentPage} of {totalPages}
           </span>
           <button
-            onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-            disabled={page === totalPages}
+            onClick={() => setPage(Math.min(totalPages, currentPage + 1))}
+            disabled={currentPage === totalPages}
             className="p-1 rounded border border-slate-200 bg-white hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed"
           >
             <ChevronRight className="w-4 h-4" />

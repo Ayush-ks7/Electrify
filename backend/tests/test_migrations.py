@@ -12,7 +12,8 @@ def test_initial_migration_and_schema_match(tmp_path, monkeypatch):
     command.upgrade(config, "head")
     engine = create_engine(url)
     try:
-        assert set(inspect(engine).get_table_names()) == {"alembic_version", "consumers", "daily_readings", "predictions"}
+        assert set(inspect(engine).get_table_names()) == {"alembic_version", "consumers", "daily_readings", "predictions",
+                                                        "simulation_streams", "meter_readings", "investigations"}
         command.check(config)
     finally:
         engine.dispose()

@@ -11,13 +11,14 @@ from sqlalchemy import inspect
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 
 from .api.dependencies import require_api_key
-from .api.routes import consumers, health, scoring
+from .api.routes import consumers, health, scoring, simulation
 from .core.config import Settings
 from .core.errors import ServiceError
 from .core.logging import configure_logging
 from .db.database import Database
 from .db.models import Base
 from .services.ai_ml_service import AIMLService
+from .services.simulation_service import SimulationService
 
 logger = logging.getLogger("electrify.backend")
 
@@ -45,8 +46,13 @@ def create_app(settings: Settings | None = None, ai_ml: AIMLService | None = Non
             app.state.ai_ml = ai_ml or AIMLService(settings)
             if ai_ml is None:
                 app.state.ai_ml.load()
+            app.state.simulation = SimulationService(database, app.state.ai_ml, settings)
+            if app.state.database_ready:
+                app.state.simulation.launch()
             yield
         finally:
+            if hasattr(app.state, "simulation"):
+                app.state.simulation.close()
             database.engine.dispose()
 
     app = FastAPI(title="Electrify Backend", version="1.0.0", lifespan=lifespan,
@@ -95,7 +101,7 @@ def create_app(settings: Settings | None = None, ai_ml: AIMLService | None = Non
         return response
 
     app.include_router(health.router)
-    for router in (health.model_router, scoring.router, consumers.router):
+    for router in (health.model_router, scoring.router, consumers.router, simulation.router):
         app.include_router(router, prefix="/api/v1", dependencies=[Depends(require_api_key)])
     return app
 

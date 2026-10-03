@@ -1,9 +1,15 @@
+import { QueryState } from '../common/QueryState';
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, X, Users, AlertTriangle, BellRing, ArrowRight } from 'lucide-react';
+import {
+  Search,
+  X,
+  Users,
+  AlertTriangle,
+  BellRing,
+  ArrowRight,
+} from 'lucide-react';
 import { useGlobalSearch } from '../../hooks';
-import { SeverityBadge } from '../common/SeverityBadge';
-import { cn } from '../../utils/classNames';
 
 export interface GlobalSearchModalProps {
   isOpen: boolean;
@@ -13,7 +19,12 @@ export interface GlobalSearchModalProps {
 export function GlobalSearchModal({ isOpen, onClose }: GlobalSearchModalProps) {
   const navigate = useNavigate();
   const [query, setQuery] = useState('');
-  const { data: results = [], isLoading } = useGlobalSearch(query);
+  const {
+    data: results = [],
+    isLoading,
+    error,
+    refetch,
+  } = useGlobalSearch(query, isOpen);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -62,7 +73,7 @@ export function GlobalSearchModal({ isOpen, onClose }: GlobalSearchModalProps) {
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search Consumer ID, Meter ID, Anomaly ID, or Case ID..."
+            placeholder="Search Consumer ID..."
             className="w-full bg-transparent text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none font-sans"
           />
           {query && (
@@ -82,34 +93,10 @@ export function GlobalSearchModal({ isOpen, onClose }: GlobalSearchModalProps) {
         <div className="max-h-96 overflow-y-auto divide-y divide-slate-100 p-2">
           {query.trim().length < 2 ? (
             <div className="py-8 text-center text-xs text-slate-500">
-              Type at least 2 characters to search across all grid entities:
-              <div className="mt-3 flex flex-wrap justify-center gap-2">
-                <button
-                  onClick={() => setQuery('CONS-7821')}
-                  className="px-2.5 py-1 rounded bg-slate-100 text-slate-700 font-mono text-[11px] hover:bg-slate-200"
-                >
-                  Consumer: CONS-7821
-                </button>
-                <button
-                  onClick={() => setQuery('MTR-90422')}
-                  className="px-2.5 py-1 rounded bg-slate-100 text-slate-700 font-mono text-[11px] hover:bg-slate-200"
-                >
-                  Meter: MTR-90422
-                </button>
-                <button
-                  onClick={() => setQuery('ANOM-1049')}
-                  className="px-2.5 py-1 rounded bg-slate-100 text-slate-700 font-mono text-[11px] hover:bg-slate-200"
-                >
-                  Anomaly: ANOM-1049
-                </button>
-                <button
-                  onClick={() => setQuery('ALT-4091')}
-                  className="px-2.5 py-1 rounded bg-slate-100 text-slate-700 font-mono text-[11px] hover:bg-slate-200"
-                >
-                  Case: ALT-4091
-                </button>
-              </div>
+              Type at least 2 characters to search stored consumer IDs.
             </div>
+          ) : error ? (
+            <QueryState error={error} onRetry={() => refetch()} />
           ) : isLoading ? (
             <div className="py-8 text-center text-xs text-slate-500 font-mono">
               Searching grid index...
@@ -133,17 +120,13 @@ export function GlobalSearchModal({ isOpen, onClose }: GlobalSearchModalProps) {
                     <div className="text-xs font-semibold text-slate-900 group-hover:text-[#0F52BA] truncate">
                       {res.title}
                     </div>
-                    <div className="text-[11px] text-slate-500 truncate">{res.subtitle}</div>
+                    <div className="text-[11px] text-slate-500 truncate">
+                      {res.subtitle}
+                    </div>
                   </div>
                 </div>
 
                 <div className="flex items-center gap-2 shrink-0">
-                  {res.severity && <SeverityBadge severity={res.severity} size="sm" />}
-                  {res.badge && (
-                    <span className="px-1.5 py-0.5 rounded text-[10px] font-mono bg-slate-100 text-slate-700 border border-slate-200">
-                      {res.badge}
-                    </span>
-                  )}
                   <ArrowRight className="w-3.5 h-3.5 text-slate-400 group-hover:text-[#0F52BA] group-hover:translate-x-0.5 transition-transform" />
                 </div>
               </div>

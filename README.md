@@ -30,3 +30,7 @@ If you are developing a production application, we recommend enabling type-aware
 ```
 
 See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+
+Frontend/backend integration setup, endpoint mapping, limitations and validation: [docs/FRONTEND_BACKEND_INTEGRATION.md](docs/FRONTEND_BACKEND_INTEGRATION.md).
+
+Virtual IoT simulation, mixed scenarios and unified investigations: [docs/SIMULATION_MODE.md](docs/SIMULATION_MODE.md). Restart the backend with one worker, open the dashboard, and click **Simulation Mode**.

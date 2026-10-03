@@ -1,3 +1,4 @@
+// Legacy demo services for unsupported workflows. Live views use the single API client in api.ts.
 import {
   Consumer,
   AnomalyItem,
