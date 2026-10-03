@@ -1,0 +1,374 @@
+{
+  "consumers": [
+    {
+      "CONS_NO": "SAMPLE_CONSUMER_001",
+      "period_start": "2026-01-01",
+      "period_end": "2026-03-31",
+      "readings": [
+        {
+          "date": "2026-01-01",
+          "consumption": 3.5
+        },
+        {
+          "date": "2026-01-02",
+          "consumption": 3.02
+        },
+        {
+          "date": "2026-01-03",
+          "consumption": 3.04
+        },
+        {
+          "date": "2026-01-04",
+          "consumption": 3.06
+        },
+        {
+          "date": "2026-01-05",
+          "consumption": 3.08
+        },
+        {
+          "date": "2026-01-06",
+          "consumption": null
+        },
+        {
+          "date": "2026-01-07",
+          "consumption": 3.12
+        },
+        {
+          "date": "2026-01-08",
+          "consumption": 3.14
+        },
+        {
+          "date": "2026-01-09",
+          "consumption": 3.16
+        },
+        {
+          "date": "2026-01-10",
+          "consumption": 3.18
+        },
+        {
+          "date": "2026-01-11",
+          "consumption": 3.7
+        },
+        {
+          "date": "2026-01-12",
+          "consumption": 3.22
+        },
+        {
+          "date": "2026-01-13",
+          "consumption": 0.0
+        },
+        {
+          "date": "2026-01-14",
+          "consumption": 3.26
+        },
+        {
+          "date": "2026-01-15",
+          "consumption": 3.2800000000000002
+        },
+        {
+          "date": "2026-01-16",
+          "consumption": 3.3
+        },
+        {
+          "date": "2026-01-17",
+          "consumption": 3.32
+        },
+        {
+          "date": "2026-01-18",
+          "consumption": 3.34
+        },
+        {
+          "date": "2026-01-19",
+          "consumption": 3.36
+        },
+        {
+          "date": "2026-01-20",
+          "consumption": 3.38
+        },
+        {
+          "date": "2026-01-21",
+          "consumption": 3.9
+        },
+        {
+          "date": "2026-01-22",
+          "consumption": 3.42
+        },
+        {
+          "date": "2026-01-23",
+          "consumption": 3.44
+        },
+        {
+          "date": "2026-01-24",
+          "consumption": 3.46
+        },
+        {
+          "date": "2026-01-25",
+          "consumption": 3.48
+        },
+        {
+          "date": "2026-01-26",
+          "consumption": 3.5
+        },
+        {
+          "date": "2026-01-27",
+          "consumption": 3.52
+        },
+        {
+          "date": "2026-01-28",
+          "consumption": 3.54
+        },
+        {
+          "date": "2026-01-29",
+          "consumption": 3.56
+        },
+        {
+          "date": "2026-01-30",
+          "consumption": 3.58
+        },
+        {
+          "date": "2026-01-31",
+          "consumption": 4.1
+        },
+        {
+          "date": "2026-02-01",
+          "consumption": null
+        },
+        {
+          "date": "2026-02-02",
+          "consumption": 3.64
+        },
+        {
+          "date": "2026-02-03",
+          "consumption": 3.66
+        },
+        {
+          "date": "2026-02-04",
+          "consumption": 3.68
+        },
+        {
+          "date": "2026-02-05",
+          "consumption": 3.7
+        },
+        {
+          "date": "2026-02-06",
+          "consumption": 3.7199999999999998
+        },
+        {
+          "date": "2026-02-07",
+          "consumption": 3.74
+        },
+        {
+          "date": "2026-02-08",
+          "consumption": 3.76
+        },
+        {
+          "date": "2026-02-09",
+          "consumption": 3.7800000000000002
+        },
+        {
+          "date": "2026-02-10",
+          "consumption": 4.3
+        },
+        {
+          "date": "2026-02-11",
+          "consumption": 3.8200000000000003
+        },
+        {
+          "date": "2026-02-12",
+          "consumption": 3.84
+        },
+        {
+          "date": "2026-02-13",
+          "consumption": 3.86
+        },
+        {
+          "date": "2026-02-14",
+          "consumption": 3.88
+        },
+        {
+          "date": "2026-02-15",
+          "consumption": 0.0
+        },
+        {
+          "date": "2026-02-16",
+          "consumption": 3.92
+        },
+        {
+          "date": "2026-02-17",
+          "consumption": 3.94
+        },
+        {
+          "date": "2026-02-18",
+          "consumption": 3.96
+        },
+        {
+          "date": "2026-02-19",
+          "consumption": 3.98
+        },
+        {
+          "date": "2026-02-20",
+          "consumption": 4.5
+        },
+        {
+          "date": "2026-02-21",
+          "consumption": 4.02
+        },
+        {
+          "date": "2026-02-22",
+          "consumption": 4.04
+        },
+        {
+          "date": "2026-02-23",
+          "consumption": 4.0600000000000005
+        },
+        {
+          "date": "2026-02-24",
+          "consumption": 4.08
+        },
+        {
+          "date": "2026-02-25",
+          "consumption": 4.1
+        },
+        {
+          "date": "2026-02-26",
+          "consumption": 4.12
+        },
+        {
+          "date": "2026-02-27",
+          "consumption": 4.140000000000001
+        },
+        {
+          "date": "2026-02-28",
+          "consumption": 4.16
+        },
+        {
+          "date": "2026-03-01",
+          "consumption": 4.18
+        },
+        {
+          "date": "2026-03-02",
+          "consumption": null
+        },
+        {
+          "date": "2026-03-03",
+          "consumption": 4.22
+        },
+        {
+          "date": "2026-03-04",
+          "consumption": 4.24
+        },
+        {
+          "date": "2026-03-05",
+          "consumption": 4.26
+        },
+        {
+          "date": "2026-03-06",
+          "consumption": 4.28
+        },
+        {
+          "date": "2026-03-07",
+          "consumption": 4.3
+        },
+        {
+          "date": "2026-03-08",
+          "consumption": 4.32
+        },
+        {
+          "date": "2026-03-09",
+          "consumption": 4.34
+        },
+        {
+          "date": "2026-03-10",
+          "consumption": 4.36
+        },
+        {
+          "date": "2026-03-11",
+          "consumption": 4.38
+        },
+        {
+          "date": "2026-03-12",
+          "consumption": 4.9
+        },
+        {
+          "date": "2026-03-13",
+          "consumption": 4.42
+        },
+        {
+          "date": "2026-03-14",
+          "consumption": 4.4399999999999995
+        },
+        {
+          "date": "2026-03-15",
+          "consumption": 4.46
+        },
+        {
+          "date": "2026-03-16",
+          "consumption": 4.48
+        },
+        {
+          "date": "2026-03-17",
+          "consumption": 4.5
+        },
+        {
+          "date": "2026-03-18",
+          "consumption": 4.52
+        },
+        {
+          "date": "2026-03-19",
+          "consumption": 4.54
+        },
+        {
+          "date": "2026-03-20",
+          "consumption": 4.5600000000000005
+        },
+        {
+          "date": "2026-03-21",
+          "consumption": 4.58
+        },
+        {
+          "date": "2026-03-22",
+          "consumption": 5.1
+        },
+        {
+          "date": "2026-03-23",
+          "consumption": 4.62
+        },
+        {
+          "date": "2026-03-24",
+          "consumption": 4.640000000000001
+        },
+        {
+          "date": "2026-03-25",
+          "consumption": 4.66
+        },
+        {
+          "date": "2026-03-26",
+          "consumption": 4.68
+        },
+        {
+          "date": "2026-03-27",
+          "consumption": 4.7
+        },
+        {
+          "date": "2026-03-28",
+          "consumption": 4.72
+        },
+        {
+          "date": "2026-03-29",
+          "consumption": 4.74
+        },
+        {
+          "date": "2026-03-30",
+          "consumption": 4.76
+        },
+        {
+          "date": "2026-03-31",
+          "consumption": 4.78
+        }
+      ]
+    }
+  ],
+  "threshold": 0.2010437721624017,
+  "include_explanations": true,
+  "explanation_top_k": 3
+}

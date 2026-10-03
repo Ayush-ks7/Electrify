@@ -1,0 +1,49 @@
+{
+  "model_version": "electrify-task7-locked-v1",
+  "scope": "Full-history consumer classification",
+  "results": [
+    {
+      "CONS_NO": "SAMPLE_CONSUMER_001",
+      "predicted_probability": 0.1393132570204588,
+      "screening_threshold": 0.2010437721624017,
+      "screening_flag": false,
+      "status": "below_screening_threshold",
+      "data_quality": {
+        "observed_days": 591,
+        "missing_days": 443,
+        "missing_ratio": 0.4284332688588008
+      },
+      "explanation": {
+        "method": "leave-one-feature-out median replacement sensitivity",
+        "top_signals": [
+          {
+            "feature": "recent_vs_prior_30d_ratio",
+            "value": 0.651020884513855,
+            "reference_value": 0.9221504032611848,
+            "probability_sensitivity": -0.06354263865685789,
+            "direction": "decreases_risk",
+            "description": "ratio of recent 30-day mean to the preceding 30-day mean"
+          },
+          {
+            "feature": "std_consumption",
+            "value": 8.836473,
+            "reference_value": 3.2731335,
+            "probability_sensitivity": 0.06159708503235942,
+            "direction": "increases_risk",
+            "description": "standard deviation of consumption"
+          },
+          {
+            "feature": "iqr_consumption",
+            "value": 12.799998,
+            "reference_value": 3.2525005,
+            "probability_sensitivity": 0.061347401381318944,
+            "direction": "increases_risk",
+            "description": "interquartile range of consumption"
+          }
+        ],
+        "note": "Sensitivity is model-specific, not causal attribution and not proof of theft."
+      }
+    }
+  ],
+  "disclaimer": "Model-generated risk prioritization only; not proof of theft and not a basis for automatic punitive action."
+}

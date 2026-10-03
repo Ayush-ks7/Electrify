@@ -1,0 +1,2 @@
+FEATURES = ['observed_days', 'missing_days', 'missing_ratio', 'zero_days', 'zero_ratio_observed', 'mean_consumption', 'median_consumption', 'std_consumption', 'min_consumption', 'max_consumption', 'p25_consumption', 'p75_consumption', 'p90_consumption', 'iqr_consumption', 'cv_consumption', 'recent_30d_mean', 'recent_vs_prior_30d_ratio', 'recent_change', 'first_quarter_mean', 'last_quarter_mean', 'long_run_change', 'consumption_trend_slope', 'recent_30d_zero_days', 'recent_30d_missing_days']
+MODEL_VERSION = 'electrify-task7-locked-v1'

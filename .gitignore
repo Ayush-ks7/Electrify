@@ -22,3 +22,45 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Backend and AI/ML
+# Python
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.egg-info/
+build/
+dist/
+
+# Environment / secrets
+.env
+.env.*
+!.env.example
+
+# Local databases / logs
+*.db
+*.sqlite
+*.sqlite3
+*.log
+
+# OS / IDE
+.DS_Store
+Thumbs.db
+
+# Keep model artifacts unless deliberately excluded
+
+# SQLite sidecars and TypeScript incremental cache
+*.db-wal
+*.db-shm
+*.db-journal
+*.sqlite-wal
+*.sqlite-shm
+*.sqlite-journal
+*.sqlite3-wal
+*.sqlite3-shm
+*.sqlite3-journal
+*.tsbuildinfo
