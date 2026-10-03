@@ -40,9 +40,10 @@ export function GlobalSearchModal({ isOpen, onClose }: GlobalSearchModalProps) {
   const getCategoryIcon = (category: string) => {
     switch (category) {
       case 'consumer':
-        return <Users className="w-4 h-4 text-blue-600" />;
+        return <Users className="w-4 h-4 text-[#0F52BA]" />;
       case 'anomaly':
         return <AlertTriangle className="w-4 h-4 text-amber-600" />;
+      case 'case':
       case 'alert':
         return <BellRing className="w-4 h-4 text-purple-600" />;
       default:
@@ -51,18 +52,18 @@ export function GlobalSearchModal({ isOpen, onClose }: GlobalSearchModalProps) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center pt-20 p-4 bg-slate-900/50 backdrop-blur-[1px]">
-      <div className="w-full max-w-xl bg-white rounded-md border border-slate-200 shadow-2xl overflow-hidden flex flex-col">
+    <div className="fixed inset-0 z-50 flex items-start justify-center pt-20 p-4 bg-slate-900/50">
+      <div className="w-full max-w-xl bg-white rounded-md border border-slate-200 shadow-xl overflow-hidden flex flex-col">
         {/* Search Input Bar */}
-        <div className="p-3.5 border-b border-slate-200 flex items-center gap-3 bg-slate-50/50">
+        <div className="p-3.5 border-b border-slate-200 flex items-center gap-3 bg-slate-50/70">
           <Search className="w-4 h-4 text-slate-400 shrink-0" />
           <input
             autoFocus
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search by Consumer ID (e.g. CONS-7821), Meter ID, Alert ID..."
-            className="w-full bg-transparent text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none"
+            placeholder="Search Consumer ID, Meter ID, Anomaly ID, or Case ID..."
+            className="w-full bg-transparent text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none font-sans"
           />
           {query && (
             <button
@@ -80,26 +81,32 @@ export function GlobalSearchModal({ isOpen, onClose }: GlobalSearchModalProps) {
         {/* Results List */}
         <div className="max-h-96 overflow-y-auto divide-y divide-slate-100 p-2">
           {query.trim().length < 2 ? (
-            <div className="py-8 text-center text-xs text-slate-400">
-              Type at least 2 characters to search consumers, meters, and alerts...
-              <div className="mt-3 flex justify-center gap-2">
+            <div className="py-8 text-center text-xs text-slate-500">
+              Type at least 2 characters to search across all grid entities:
+              <div className="mt-3 flex flex-wrap justify-center gap-2">
                 <button
                   onClick={() => setQuery('CONS-7821')}
-                  className="px-2 py-1 rounded bg-slate-100 text-slate-700 font-mono text-[11px] hover:bg-slate-200"
+                  className="px-2.5 py-1 rounded bg-slate-100 text-slate-700 font-mono text-[11px] hover:bg-slate-200"
                 >
-                  CONS-7821
+                  Consumer: CONS-7821
                 </button>
                 <button
                   onClick={() => setQuery('MTR-90422')}
-                  className="px-2 py-1 rounded bg-slate-100 text-slate-700 font-mono text-[11px] hover:bg-slate-200"
+                  className="px-2.5 py-1 rounded bg-slate-100 text-slate-700 font-mono text-[11px] hover:bg-slate-200"
                 >
-                  MTR-90422
+                  Meter: MTR-90422
+                </button>
+                <button
+                  onClick={() => setQuery('ANOM-1049')}
+                  className="px-2.5 py-1 rounded bg-slate-100 text-slate-700 font-mono text-[11px] hover:bg-slate-200"
+                >
+                  Anomaly: ANOM-1049
                 </button>
                 <button
                   onClick={() => setQuery('ALT-4091')}
-                  className="px-2 py-1 rounded bg-slate-100 text-slate-700 font-mono text-[11px] hover:bg-slate-200"
+                  className="px-2.5 py-1 rounded bg-slate-100 text-slate-700 font-mono text-[11px] hover:bg-slate-200"
                 >
-                  ALT-4091
+                  Case: ALT-4091
                 </button>
               </div>
             </div>

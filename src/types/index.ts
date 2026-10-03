@@ -191,6 +191,28 @@ export interface ModelMetrics {
   validationDatasetSize: number;
 }
 
+export type CaseStatus = AlertStatus;
+export type CaseItem = AlertItem;
+
+export interface AnalyticsSummary {
+  riskDistribution: Array<{ name: string; count: number; color: string }>;
+  riskScoreTrend: Array<{ period: string; avgScore: number; highRiskCount: number }>;
+  causeDistribution: Array<{ name: string; count: number; percentage: number; color: string }>;
+  severityDistribution: Array<{ name: string; value: number; color: string }>;
+  anomaliesOverTime: Array<{ date: string; count: number; theft: number; fault: number; comm: number }>;
+  hourlyHeatmap: Array<{ hour: string; avgKwh: number; anomalyRatePct: number }>;
+  dailyPatterns: Array<{ day: string; actual: number; baseline: number }>;
+  confidenceDistribution: Array<{ range: string; count: number }>;
+  segmentLosses: Array<{ segment: string; losses: number; verifiedTheft: number }>;
+  resolutionStats: {
+    totalCases: number;
+    confirmedRate: number;
+    falsePositiveRate: number;
+    avgResolutionTimeHours: number;
+    revenueRecoveredEstimate: string;
+  };
+}
+
 export interface QualityIssueItem {
   id: string;
   meterId: string;
@@ -210,6 +232,8 @@ export interface DataQualitySummary {
   duplicatesPct: number;
   qualityScore: number;
   issues: QualityIssueItem[];
+  issueTypeDistribution: Array<{ name: string; count: number; color: string }>;
+  topMetersMissing: Array<{ meterId: string; gaps: number; location: string }>;
   trend: Array<{
     date: string;
     qualityScore: number;
@@ -235,8 +259,9 @@ export interface GlobalSearchResult {
   id: string;
   title: string;
   subtitle: string;
-  category: 'consumer' | 'meter' | 'alert' | 'anomaly';
+  category: 'consumer' | 'meter' | 'alert' | 'anomaly' | 'case';
   url: string;
   severity?: Severity;
   badge?: string;
 }
+
