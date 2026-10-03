@@ -1,0 +1,37 @@
+{
+  "dataset": "B",
+  "rows": 9956,
+  "target": "CHK_STATE",
+  "used_only_after_Dataset_A_model_lock": true,
+  "used_for_model_selection_or_threshold_tuning": false,
+  "roc_auc": 0.8154973998418825,
+  "pr_auc": 0.5023128811099715,
+  "brier": 0.10307680062152906,
+  "thresholds": [
+    {
+      "threshold": 0.5,
+      "precision": 0.8085106382978723,
+      "recall": 0.054519368723098996,
+      "f1": 0.10215053763440861,
+      "accuracy": 0.8658095620731218,
+      "balanced_accuracy": 0.5262085280896504,
+      "tn": 8544,
+      "fp": 18,
+      "fn": 1318,
+      "tp": 76
+    },
+    {
+      "threshold": 0.2010437721624017,
+      "precision": 0.6211562115621156,
+      "recall": 0.36226685796269725,
+      "f1": 0.4576347983688265,
+      "accuracy": 0.8797709923664122,
+      "balanced_accuracy": 0.663146977217742,
+      "tn": 8254,
+      "fp": 308,
+      "fn": 889,
+      "tp": 505
+    }
+  ],
+  "interpretation": "Post-lock robustness evidence only. Dataset B has different labels and data-collection characteristics, so metrics are not directly interchangeable with Dataset A."
+}

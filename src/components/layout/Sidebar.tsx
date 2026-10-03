@@ -3,10 +3,6 @@ import { NavLink, useLocation } from 'react-router-dom';
 import {
   LayoutDashboard,
   Users,
-  AlertTriangle,
-  FolderKanban,
-  BarChart3,
-  ShieldCheck,
   Settings,
   ChevronLeft,
   ChevronRight,
@@ -25,11 +21,7 @@ export function Sidebar({ collapsed, onToggleCollapse, className }: SidebarProps
 
   const primaryNavItems = [
     { label: 'Overview', href: '/dashboard', icon: LayoutDashboard },
-    { label: 'Consumers', href: '/consumers', icon: Users },
-    { label: 'Anomalies', href: '/anomalies', icon: AlertTriangle },
-    { label: 'Cases', href: '/cases', icon: FolderKanban },
-    { label: 'Analytics', href: '/analytics', icon: BarChart3 },
-    { label: 'Data Quality', href: '/data-quality', icon: ShieldCheck },
+    { label: 'Investigations', href: '/consumers', icon: Users },
   ];
 
   return (

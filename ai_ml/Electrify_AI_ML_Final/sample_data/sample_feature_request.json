@@ -1,0 +1,36 @@
+{
+  "consumers": [
+    {
+      "CONS_NO": "SAMPLE_CONSUMER_001",
+      "features": {
+        "observed_days": 591.0,
+        "missing_days": 443.0,
+        "missing_ratio": 0.4284332688588008,
+        "zero_days": 0.0,
+        "zero_ratio_observed": 0.0,
+        "mean_consumption": 13.898343,
+        "median_consumption": 9.77,
+        "std_consumption": 8.836473,
+        "min_consumption": 2.46,
+        "max_consumption": 46.49,
+        "p25_consumption": 7.1400003,
+        "p75_consumption": 19.939999,
+        "p90_consumption": 26.62,
+        "iqr_consumption": 12.799998,
+        "cv_consumption": 0.6357933282852173,
+        "recent_30d_mean": 8.673334,
+        "recent_vs_prior_30d_ratio": 0.651020884513855,
+        "recent_change": -0.3489790856838226,
+        "first_quarter_mean": 13.108626,
+        "last_quarter_mean": 13.547911,
+        "long_run_change": 0.0335110872983932,
+        "consumption_trend_slope": -0.0002032167071095,
+        "recent_30d_zero_days": 0.0,
+        "recent_30d_missing_days": 0.0
+      }
+    }
+  ],
+  "threshold": 0.2010437721624017,
+  "include_explanations": true,
+  "explanation_top_k": 3
+}

@@ -1,0 +1,48 @@
+# Final Runtime Test Report
+
+## Automated tests
+Command: `python -m pytest -q`
+
+Result:
+`11 passed in 1.59s`
+
+## Package validation
+Command: `python scripts/validate_package.py`
+
+Result:
+`VALIDATION_OK`
+- feature count: 24
+- model loaded successfully
+- default threshold: 0.2010437721624017
+
+## Python compilation
+Command: `python -m compileall -q src tests scripts`
+
+Result:
+`PASS`
+
+## Raw feature parity
+Command-level verification compared the shipped feature transformer with the original Task 4 Dataset A V1 feature output on 5 raw rows × 24 features.
+
+Result:
+`PASS`
+Maximum absolute difference: 1.678466795e-06
+Tolerance: 2e-6 absolute / 2e-6 relative
+
+## Model artifact identity
+Result:
+`PASS`
+The final package model is byte-identical to the locked Task 7 model artifact.
+
+SHA-256:
+9d3e2853e71d01d80f051520d858fa27d07f0026d1ffa8e8efb97ba23e28ee02
+
+## API smoke
+A real Uvicorn process was started locally and the following returned HTTP 200:
+- `GET /health`
+- `GET /v1/model-info`
+- `POST /v1/score`
+- `POST /v1/score-history`
+
+Sample `/v1/score` probability: 0.1393132570204588
+Sample `/v1/score-history` probability: 0.006988161870628062

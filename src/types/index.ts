@@ -50,9 +50,9 @@ export interface ModelSignal {
 export interface ConsumptionDataPoint {
   timestamp: string;
   label: string;
-  actual: number;
-  baseline: number;
-  peerAverage: number;
+  actual: number | null;
+  baseline: number | null;
+  peerAverage: number | null;
   isAnomaly?: boolean;
 }
 

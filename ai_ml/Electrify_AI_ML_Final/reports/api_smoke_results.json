@@ -1,0 +1,10 @@
+{
+  "health_status": 200,
+  "model_info_status": 200,
+  "score_status": 200,
+  "score_history_status": 200,
+  "feature_count": 24,
+  "sample_score_probability": 0.1393132570204588,
+  "sample_history_probability": 0.006988161870628062,
+  "model_loaded": true
+}

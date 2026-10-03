@@ -1,0 +1,13 @@
+{
+  "primary_metric": "5-fold CV PR-AUC on training split",
+  "secondary_metric": "5-fold CV ROC-AUC",
+  "selection_rule": "highest mean CV PR-AUC; if effectively tied, use CV ROC-AUC as secondary criterion",
+  "selected_model": "hist_gradient_boosting",
+  "selected_feature_set": "full_v1",
+  "cv_pr_auc": 0.3461946066566254,
+  "cv_roc_auc": 0.7976502329831339,
+  "runner_up_by_pr_auc": "extra_trees full_v1",
+  "runner_up_cv_pr_auc": 0.34611787815988754,
+  "pr_auc_gap": 7.672849673787e-05,
+  "interpretation": "The leading two full-V1 models are essentially tied on PR-AUC at the reported precision. HistGradientBoosting has higher CV ROC-AUC and is selected for the next locking stage, but this is not evidence that it is universally superior."
+}

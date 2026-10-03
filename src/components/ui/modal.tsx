@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { X } from 'lucide-react';
 import { cn } from '../../utils/classNames';
 
@@ -21,6 +21,23 @@ export function Modal({
   footer,
   size = 'md',
 }: ModalProps) {
+  const dialog = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!isOpen) return;
+    const previous = document.activeElement as HTMLElement | null;
+    const node = dialog.current;
+    const focusable = () => Array.from(node?.querySelectorAll<HTMLElement>('button:not([disabled]), input:not([disabled]), select:not([disabled]), a[href], [tabindex="0"]') ?? []);
+    focusable()[0]?.focus();
+    const trap = (event: KeyboardEvent) => {
+      if (event.key !== 'Tab') return;
+      const elements = focusable();
+      const first = elements[0], last = elements.at(-1);
+      if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last?.focus(); }
+      else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first?.focus(); }
+    };
+    node?.addEventListener('keydown', trap);
+    return () => { node?.removeEventListener('keydown', trap); previous?.focus(); };
+  }, [isOpen]);
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape' && isOpen) {
@@ -43,11 +60,13 @@ export function Modal({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-[1px]">
       <div
+        ref={dialog}
         className={cn(
           'w-full bg-white rounded-md border border-slate-200 shadow-xl overflow-hidden flex flex-col max-h-[90vh]',
           sizes[size]
         )}
         role="dialog"
+        aria-label={title}
         aria-modal="true"
       >
         <div className="px-5 py-4 border-b border-slate-200 flex items-center justify-between bg-white shrink-0">

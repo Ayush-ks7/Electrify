@@ -1,0 +1,8 @@
+{
+  "default_threshold": 0.2010437721624017,
+  "max_consumers_per_request": 100,
+  "explanation_top_k": 3,
+  "log_level": "INFO",
+  "training_reference_days": 1034,
+  "min_history_days_for_full_recent_comparison": 60
+}

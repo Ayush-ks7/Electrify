@@ -1,4 +1,5 @@
-export function formatKwh(value: number): string {
+export function formatKwh(value: number | null | undefined): string {
+  if (value == null) return 'Missing';
   if (value >= 1000) {
     return `${(value / 1000).toFixed(1)} MWh`;
   }

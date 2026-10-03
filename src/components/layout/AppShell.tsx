@@ -4,7 +4,8 @@ import { Sidebar } from './Sidebar';
 import { Topbar } from './Topbar';
 import { NotificationDrawer } from './NotificationDrawer';
 import { GlobalSearchModal } from './GlobalSearchModal';
-import { useNotifications } from '../../hooks';
+import { useInvestigations } from '../../hooks/simulation';
+import { SimulationPanel } from './SimulationPanel';
 
 export function AppShell() {
   const location = useLocation();
@@ -13,7 +14,8 @@ export function AppShell() {
   const [searchOpen, setSearchOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
 
-  const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications();
+  const investigations = useInvestigations();
+  const unreadCount = (investigations.data ?? []).filter(r => r.requires_review && !['Dismissed', 'Resolved'].includes(r.case_status ?? '')).length;
 
   // Close mobile sidebar on route change
   useEffect(() => {
@@ -34,27 +36,15 @@ export function AppShell() {
 
   const getPageMeta = (pathname: string) => {
     if (pathname.startsWith('/consumers/')) {
-      return { title: 'Consumer Intelligence Dossier', subtitle: 'Detailed load analytics, anomaly attribution, and evidence' };
-    }
-    if (pathname.startsWith('/anomalies/')) {
-      return { title: 'Anomaly Forensic Analysis', subtitle: 'Multi-model signal breakdown, temporal vectors, and audit log' };
+        return { title: 'Consumer Investigation', subtitle: 'Live readings, history, operational evidence and model explanations' };
     }
     switch (pathname) {
       case '/dashboard':
-        return { title: 'Overview', subtitle: 'Operational priorities, critical alerts, and active anomaly queues' };
+        return { title: 'Overview', subtitle: 'Live monitoring, consumer investigations and full-history review signals' };
       case '/consumers':
-        return { title: 'Consumers', subtitle: 'Search, filter, and audit metered connections and risk indices' };
-      case '/anomalies':
-        return { title: 'Anomalies', subtitle: 'Registry of statistical, isolation forest, and temporal outliers' };
-      case '/cases':
-      case '/alerts':
-        return { title: 'Cases', subtitle: 'Investigation queue, operator workflow, and status resolution' };
-      case '/analytics':
-        return { title: 'Analytics', subtitle: 'Aggregate trends, cause breakdowns, and diurnal profiles' };
-      case '/data-quality':
-        return { title: 'Data Quality', subtitle: 'Telemetry sanitization, missing intervals, and sensor health' };
+        return { title: 'Consumers & Investigations', subtitle: 'Consumption, evidence and case status in one record' };
       case '/system':
-        return { title: 'Settings & System Diagnostics', subtitle: 'Module runtime status and ML performance metrics' };
+        return { title: 'Settings & System Diagnostics', subtitle: 'Backend health and locked model metadata' };
       default:
         return { title: 'Electrify Platform', subtitle: 'Grid Anomaly Intelligence' };
     }
@@ -107,15 +97,13 @@ export function AppShell() {
       </div>
 
       {/* Search Modal */}
+      <SimulationPanel />
       <GlobalSearchModal isOpen={searchOpen} onClose={() => setSearchOpen(false)} />
 
       {/* Notification Drawer */}
       <NotificationDrawer
         isOpen={notificationsOpen}
         onClose={() => setNotificationsOpen(false)}
-        notifications={notifications}
-        onMarkAsRead={markAsRead}
-        onMarkAllAsRead={markAllAsRead}
       />
     </div>
   );

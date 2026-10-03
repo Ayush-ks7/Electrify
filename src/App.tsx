@@ -5,11 +5,6 @@ import { AppShell } from './components/layout/AppShell';
 import { Dashboard } from './pages/Dashboard';
 import { Consumers } from './pages/Consumers';
 import { ConsumerDetail } from './pages/ConsumerDetail';
-import { Anomalies } from './pages/Anomalies';
-import { AnomalyDetail } from './pages/AnomalyDetail';
-import { Cases } from './pages/Cases';
-import { Analytics } from './pages/Analytics';
-import { DataQuality } from './pages/DataQuality';
 import { System } from './pages/System';
 
 const queryClient = new QueryClient({
@@ -31,12 +26,12 @@ function App() {
             <Route path="dashboard" element={<Dashboard />} />
             <Route path="consumers" element={<Consumers />} />
             <Route path="consumers/:id" element={<ConsumerDetail />} />
-            <Route path="anomalies" element={<Anomalies />} />
-            <Route path="anomalies/:id" element={<AnomalyDetail />} />
-            <Route path="cases" element={<Cases />} />
-            <Route path="alerts" element={<Navigate to="/cases" replace />} />
-            <Route path="analytics" element={<Analytics />} />
-            <Route path="data-quality" element={<DataQuality />} />
+            <Route path="anomalies" element={<Navigate to="/consumers" replace />} />
+            <Route path="anomalies/:id" element={<Navigate to="/consumers" replace />} />
+            <Route path="cases" element={<Navigate to="/consumers" replace />} />
+            <Route path="alerts" element={<Navigate to="/consumers" replace />} />
+            <Route path="analytics" element={<Navigate to="/dashboard" replace />} />
+            <Route path="data-quality" element={<Navigate to="/consumers" replace />} />
             <Route path="system" element={<System />} />
             <Route path="*" element={<Navigate to="/dashboard" replace />} />
           </Route>
