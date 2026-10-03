@@ -175,6 +175,20 @@ export const useAlerts = (params?: {
   };
 };
 
+export const useCases = (params?: {
+  search?: string;
+  severity?: string;
+  status?: string;
+  cause?: string;
+}) => {
+  const result = useAlerts(params);
+  return {
+    ...result,
+    cases: result.alerts,
+  };
+};
+
+
 export const useAnalytics = (filters?: Record<string, string>) => {
   return useQuery({
     queryKey: ['analytics', filters],

@@ -20,6 +20,7 @@ import {
   mockModelMetrics,
   mockDataQualitySummary,
   mockNotifications,
+  mockAnalyticsData,
   generateConsumerHistory,
   generate24HourProfile,
 } from '../mocks';
@@ -329,50 +330,7 @@ export const alertService = {
 export const analyticsService = {
   getSummary: async () => {
     await delay();
-    return {
-      riskDistribution: [
-        { name: 'Low (0-39)', count: 11420, color: '#10b981' },
-        { name: 'Medium (40-69)', count: 2840, color: '#f59e0b' },
-        { name: 'High (70-84)', count: 442, color: '#f97316' },
-        { name: 'Critical (85-100)', count: 148, color: '#ef4444' },
-      ],
-      causeDistribution: [
-        { name: 'Suspected Theft', count: 142, percentage: 41.5, color: '#ef4444' },
-        { name: 'Meter Fault', count: 98, percentage: 28.7, color: '#f97316' },
-        { name: 'Communication Issue', count: 64, percentage: 18.7, color: '#3b82f6' },
-        { name: 'Legitimate Behaviour', count: 38, percentage: 11.1, color: '#10b981' },
-      ],
-      anomaliesOverTime: [
-        { date: 'Sep 05', count: 28, theft: 12, fault: 9, comm: 7 },
-        { date: 'Sep 10', count: 34, theft: 15, fault: 10, comm: 9 },
-        { date: 'Sep 15', count: 31, theft: 14, fault: 9, comm: 8 },
-        { date: 'Sep 20', count: 42, theft: 20, fault: 12, comm: 10 },
-        { date: 'Sep 25', count: 58, theft: 26, fault: 18, comm: 14 },
-        { date: 'Sep 30', count: 49, theft: 22, fault: 16, comm: 11 },
-        { date: 'Oct 03', count: 39, theft: 18, fault: 13, comm: 8 },
-      ],
-      hourlyHeatmap: [
-        { hour: '00:00', avgKwh: 12.4, anomalyRatePct: 4.2 },
-        { hour: '02:00', avgKwh: 9.8, anomalyRatePct: 8.5 },
-        { hour: '04:00', avgKwh: 8.4, anomalyRatePct: 12.1 },
-        { hour: '06:00', avgKwh: 14.2, anomalyRatePct: 5.4 },
-        { hour: '08:00', avgKwh: 26.5, anomalyRatePct: 3.1 },
-        { hour: '10:00', avgKwh: 34.8, anomalyRatePct: 6.8 },
-        { hour: '12:00', avgKwh: 38.2, anomalyRatePct: 7.2 },
-        { hour: '14:00', avgKwh: 39.5, anomalyRatePct: 9.4 },
-        { hour: '16:00', avgKwh: 36.1, anomalyRatePct: 6.0 },
-        { hour: '18:00', avgKwh: 32.4, anomalyRatePct: 4.5 },
-        { hour: '20:00', avgKwh: 28.0, anomalyRatePct: 3.9 },
-        { hour: '22:00', avgKwh: 18.6, anomalyRatePct: 4.1 },
-      ],
-      resolutionStats: {
-        totalCases: 284,
-        confirmedRate: 64.2,
-        falsePositiveRate: 14.5,
-        avgResolutionTimeHours: 32.4,
-        revenueRecoveredEstimate: '$148,200',
-      },
-    };
+    return { ...mockAnalyticsData };
   },
 };
 
@@ -458,19 +416,20 @@ export const searchService = {
       }
     });
 
-    // Search Alerts
+    // Search Cases / Alerts
     getStoredAlerts().forEach((al) => {
       if (
         al.id.toLowerCase().includes(q) ||
         al.consumerId.toLowerCase().includes(q) ||
-        al.meterId.toLowerCase().includes(q)
+        al.meterId.toLowerCase().includes(q) ||
+        'case'.includes(q)
       ) {
         results.push({
           id: al.id,
-          title: `${al.id} - ${al.status}`,
+          title: `Case #${al.id} - ${al.status}`,
           subtitle: `${al.consumerName} | ${al.cause} | Assignee: ${al.assignee}`,
-          category: 'alert',
-          url: `/alerts?id=${al.id}`,
+          category: 'case',
+          url: `/cases?id=${al.id}`,
           severity: al.severity,
           badge: al.status,
         });
@@ -480,3 +439,6 @@ export const searchService = {
     return results.slice(0, 10);
   },
 };
+
+export const caseService = alertService;
+

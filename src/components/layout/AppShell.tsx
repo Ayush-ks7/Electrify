@@ -41,19 +41,20 @@ export function AppShell() {
     }
     switch (pathname) {
       case '/dashboard':
-        return { title: 'Operational Overview', subtitle: 'Grid health telemetry, anomaly prevalence, and priority queues' };
+        return { title: 'Overview', subtitle: 'Operational priorities, critical alerts, and active anomaly queues' };
       case '/consumers':
-        return { title: 'Consumer Directory', subtitle: 'Search, filter, and audit metered connections and risk indices' };
+        return { title: 'Consumers', subtitle: 'Search, filter, and audit metered connections and risk indices' };
       case '/anomalies':
-        return { title: 'Anomaly Registry', subtitle: 'Comprehensive log of statistical, isolation, and temporal outliers' };
+        return { title: 'Anomalies', subtitle: 'Registry of statistical, isolation forest, and temporal outliers' };
+      case '/cases':
       case '/alerts':
-        return { title: 'Alerts & Case Management', subtitle: 'Operator dispatch workflow, status lifecycle, and verification' };
+        return { title: 'Cases', subtitle: 'Investigation queue, operator workflow, and status resolution' };
       case '/analytics':
-        return { title: 'Intelligence & Pattern Analytics', subtitle: 'Aggregate trends, cause breakdowns, and diurnal profiles' };
+        return { title: 'Analytics', subtitle: 'Aggregate trends, cause breakdowns, and diurnal profiles' };
       case '/data-quality':
-        return { title: 'Data Cleaning & Ingestion Quality', subtitle: 'Missing values, duplicate detection, and sensor health' };
+        return { title: 'Data Quality', subtitle: 'Telemetry sanitization, missing intervals, and sensor health' };
       case '/system':
-        return { title: 'Pipeline & Model Diagnostics', subtitle: 'ML architecture health, precision/recall, and inference latency' };
+        return { title: 'Settings & System Diagnostics', subtitle: 'Module runtime status and ML performance metrics' };
       default:
         return { title: 'Electrify Platform', subtitle: 'Grid Anomaly Intelligence' };
     }

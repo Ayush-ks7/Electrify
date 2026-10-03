@@ -1,28 +1,27 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { AnomalyItem } from '../../types';
+import { CaseItem } from '../../types';
 import { SeverityBadge } from '../common/SeverityBadge';
-import { RiskIndicator } from '../common/RiskIndicator';
+import { StatusBadge } from '../common/StatusBadge';
 import { formatTimestamp } from '../../utils/formatters';
 import { ChevronRight, ArrowUpDown, ChevronLeft } from 'lucide-react';
 import { cn } from '../../utils/classNames';
 
-export interface AnomalyTableProps {
-  anomalies: AnomalyItem[];
+export interface CaseTableProps {
+  cases: CaseItem[];
   isLoading?: boolean;
+  onSelectCase: (caseItem: CaseItem) => void;
   className?: string;
 }
 
-export type AnomalySortField = 'id' | 'consumer' | 'risk' | 'cause' | 'severity' | 'time' | 'status';
+export type CaseSortField = 'id' | 'consumer' | 'priority' | 'cause' | 'assignee' | 'status' | 'updated';
 
-export function AnomalyTable({ anomalies, isLoading, className }: AnomalyTableProps) {
-  const navigate = useNavigate();
-  const [sortField, setSortField] = useState<AnomalySortField>('time');
+export function CaseTable({ cases, isLoading, onSelectCase, className }: CaseTableProps) {
+  const [sortField, setSortField] = useState<CaseSortField>('updated');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
   const [page, setPage] = useState(1);
   const pageSize = 10;
 
-  const handleSort = (field: AnomalySortField) => {
+  const handleSort = (field: CaseSortField) => {
     if (sortField === field) {
       setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
     } else {
@@ -31,26 +30,29 @@ export function AnomalyTable({ anomalies, isLoading, className }: AnomalyTablePr
     }
   };
 
-  const sortedAnomalies = [...anomalies].sort((a, b) => {
+  const sortedCases = [...cases].sort((a, b) => {
     let comparison = 0;
     if (sortField === 'id') {
       comparison = a.id.localeCompare(b.id);
     } else if (sortField === 'consumer') {
       comparison = a.consumerName.localeCompare(b.consumerName);
-    } else if (sortField === 'risk') {
-      comparison = a.riskScore - b.riskScore;
+    } else if (sortField === 'priority') {
+      const priorityOrder = { critical: 4, high: 3, medium: 2, low: 1 };
+      comparison = (priorityOrder[a.severity] || 0) - (priorityOrder[b.severity] || 0);
     } else if (sortField === 'cause') {
-      comparison = a.likelyCause.localeCompare(b.likelyCause);
-    } else if (sortField === 'time') {
-      comparison = new Date(a.detectedAt).getTime() - new Date(b.detectedAt).getTime();
+      comparison = a.cause.localeCompare(b.cause);
+    } else if (sortField === 'assignee') {
+      comparison = a.assignee.localeCompare(b.assignee);
     } else if (sortField === 'status') {
       comparison = a.status.localeCompare(b.status);
+    } else if (sortField === 'updated') {
+      comparison = new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
     }
     return sortDirection === 'asc' ? comparison : -comparison;
   });
 
-  const totalPages = Math.ceil(sortedAnomalies.length / pageSize) || 1;
-  const paginatedAnomalies = sortedAnomalies.slice((page - 1) * pageSize, page * pageSize);
+  const totalPages = Math.ceil(sortedCases.length / pageSize) || 1;
+  const paginatedCases = sortedCases.slice((page - 1) * pageSize, page * pageSize);
 
   return (
     <div className={cn('bg-white border border-slate-200 rounded-md overflow-hidden', className)}>
@@ -63,7 +65,7 @@ export function AnomalyTable({ anomalies, isLoading, className }: AnomalyTablePr
                 onClick={() => handleSort('id')}
               >
                 <div className="flex items-center gap-1">
-                  ID
+                  Case
                   <ArrowUpDown className="w-3 h-3 text-slate-400" />
                 </div>
               </th>
@@ -78,10 +80,10 @@ export function AnomalyTable({ anomalies, isLoading, className }: AnomalyTablePr
               </th>
               <th
                 className="py-3 px-4 cursor-pointer hover:text-slate-900 select-none"
-                onClick={() => handleSort('risk')}
+                onClick={() => handleSort('priority')}
               >
                 <div className="flex items-center gap-1">
-                  Risk
+                  Priority
                   <ArrowUpDown className="w-3 h-3 text-slate-400" />
                 </div>
               </th>
@@ -94,17 +96,33 @@ export function AnomalyTable({ anomalies, isLoading, className }: AnomalyTablePr
                   <ArrowUpDown className="w-3 h-3 text-slate-400" />
                 </div>
               </th>
-              <th className="py-3 px-4">Severity</th>
               <th
                 className="py-3 px-4 cursor-pointer hover:text-slate-900 select-none"
-                onClick={() => handleSort('time')}
+                onClick={() => handleSort('assignee')}
               >
                 <div className="flex items-center gap-1">
-                  Time
+                  Assignee
                   <ArrowUpDown className="w-3 h-3 text-slate-400" />
                 </div>
               </th>
-              <th className="py-3 px-4">Status</th>
+              <th
+                className="py-3 px-4 cursor-pointer hover:text-slate-900 select-none"
+                onClick={() => handleSort('status')}
+              >
+                <div className="flex items-center gap-1">
+                  Status
+                  <ArrowUpDown className="w-3 h-3 text-slate-400" />
+                </div>
+              </th>
+              <th
+                className="py-3 px-4 cursor-pointer hover:text-slate-900 select-none"
+                onClick={() => handleSort('updated')}
+              >
+                <div className="flex items-center gap-1">
+                  Updated
+                  <ArrowUpDown className="w-3 h-3 text-slate-400" />
+                </div>
+              </th>
               <th className="py-3 px-3 text-right"></th>
             </tr>
           </thead>
@@ -114,61 +132,44 @@ export function AnomalyTable({ anomalies, isLoading, className }: AnomalyTablePr
                 <td colSpan={8} className="py-12 text-center text-slate-500">
                   <div className="flex items-center justify-center gap-2 font-mono">
                     <span className="w-2 h-2 rounded-full bg-[#0F52BA] animate-ping" />
-                    Loading anomaly registry...
+                    Loading cases...
                   </div>
                 </td>
               </tr>
-            ) : paginatedAnomalies.length === 0 ? (
+            ) : paginatedCases.length === 0 ? (
               <tr>
                 <td colSpan={8} className="py-12 text-center text-slate-500">
-                  No matching anomalies found.
+                  No matching cases found.
                 </td>
               </tr>
             ) : (
-              paginatedAnomalies.map((a) => (
+              paginatedCases.map((c) => (
                 <tr
-                  key={a.id}
-                  onClick={() => navigate(`/anomalies/${a.id}`)}
+                  key={c.id}
+                  onClick={() => onSelectCase(c)}
                   className="hover:bg-slate-50 cursor-pointer transition-colors group"
                 >
                   <td className="py-3 px-4">
                     <span className="font-mono font-bold text-slate-900 group-hover:text-[#0F52BA] transition-colors">
-                      {a.id}
+                      {c.id}
                     </span>
                   </td>
                   <td className="py-3 px-4">
-                    <div className="font-medium text-slate-900">{a.consumerName}</div>
+                    <div className="font-semibold text-slate-900">{c.consumerName}</div>
                     <div className="text-[11px] text-slate-500 font-mono">
-                      {a.consumerId} • {a.meterId}
+                      {c.consumerId} • {c.meterId}
                     </div>
                   </td>
                   <td className="py-3 px-4">
-                    <RiskIndicator score={a.riskScore} severity={a.severity} size="sm" />
+                    <SeverityBadge severity={c.severity} size="sm" />
                   </td>
+                  <td className="py-3 px-4 font-medium text-slate-800">{c.cause}</td>
+                  <td className="py-3 px-4 text-slate-700">{c.assignee}</td>
                   <td className="py-3 px-4">
-                    <span className="font-medium text-slate-800">{a.likelyCause}</span>
-                    <span className="text-[11px] text-slate-500 font-mono block">
-                      {a.confidence}% conf
-                    </span>
-                  </td>
-                  <td className="py-3 px-4">
-                    <SeverityBadge severity={a.severity} size="sm" />
+                    <StatusBadge status={c.status} size="sm" />
                   </td>
                   <td className="py-3 px-4 text-slate-500 font-mono text-[11px]">
-                    {formatTimestamp(a.detectedAt)}
-                  </td>
-                  <td className="py-3 px-4">
-                    <span
-                      className={cn(
-                        'px-2 py-0.5 rounded text-[11px] font-medium border font-mono',
-                        a.status === 'Investigating' && 'bg-blue-50 text-blue-700 border-blue-200',
-                        a.status === 'Unresolved' && 'bg-red-50 text-red-700 border-red-200',
-                        a.status === 'Confirmed' && 'bg-purple-50 text-purple-700 border-purple-200',
-                        a.status === 'Dismissed' && 'bg-slate-100 text-slate-600 border-slate-200'
-                      )}
-                    >
-                      {a.status}
-                    </span>
+                    {formatTimestamp(c.createdAt)}
                   </td>
                   <td className="py-3 px-3 text-right">
                     <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-[#0F52BA] group-hover:translate-x-0.5 transition-all inline" />
@@ -185,17 +186,17 @@ export function AnomalyTable({ anomalies, isLoading, className }: AnomalyTablePr
         <div>
           Showing{' '}
           <span className="font-mono font-bold text-slate-900">
-            {paginatedAnomalies.length > 0 ? (page - 1) * pageSize + 1 : 0}
+            {paginatedCases.length > 0 ? (page - 1) * pageSize + 1 : 0}
           </span>{' '}
           to{' '}
           <span className="font-mono font-bold text-slate-900">
-            {Math.min(page * pageSize, sortedAnomalies.length)}
+            {Math.min(page * pageSize, sortedCases.length)}
           </span>{' '}
           of{' '}
           <span className="font-mono font-bold text-slate-900">
-            {sortedAnomalies.length}
+            {sortedCases.length}
           </span>{' '}
-          anomalies
+          cases
         </div>
 
         <div className="flex items-center gap-1.5">

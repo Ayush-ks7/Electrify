@@ -7,7 +7,7 @@ import { Consumers } from './pages/Consumers';
 import { ConsumerDetail } from './pages/ConsumerDetail';
 import { Anomalies } from './pages/Anomalies';
 import { AnomalyDetail } from './pages/AnomalyDetail';
-import { Alerts } from './pages/Alerts';
+import { Cases } from './pages/Cases';
 import { Analytics } from './pages/Analytics';
 import { DataQuality } from './pages/DataQuality';
 import { System } from './pages/System';
@@ -33,7 +33,8 @@ function App() {
             <Route path="consumers/:id" element={<ConsumerDetail />} />
             <Route path="anomalies" element={<Anomalies />} />
             <Route path="anomalies/:id" element={<AnomalyDetail />} />
-            <Route path="alerts" element={<Alerts />} />
+            <Route path="cases" element={<Cases />} />
+            <Route path="alerts" element={<Navigate to="/cases" replace />} />
             <Route path="analytics" element={<Analytics />} />
             <Route path="data-quality" element={<DataQuality />} />
             <Route path="system" element={<System />} />
