@@ -17,6 +17,10 @@ export const risk = (c: Consumer) =>
       : c.investigation?.review_probability != null
         ? "Low"
         : "Not scored";
+
+export { computeRiskScore } from "./scoring";
+
+
 export const status = (c: Consumer) =>
   c.investigation?.requires_review
     ? "Anomaly detected"

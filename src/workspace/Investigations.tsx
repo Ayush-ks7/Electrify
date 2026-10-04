@@ -19,6 +19,7 @@ import {
   Tabs,
 } from "./ui";
 import type { Anomaly, Case, CaseStatus, Workspace } from "./types";
+import { RiskScore } from "./RiskScore";
 export function Anomalies() {
   const query = useWorkspace();
   const [filter, setFilter] = useState("");
@@ -89,12 +90,7 @@ export function Anomalies() {
                         }
                       </td>
                       <td>
-                        {number(
-                          a.evidence.review_probability == null
-                            ? null
-                            : a.evidence.review_probability * 100,
-                          "%",
-                        )}
+                        <RiskScore info={a.evidence} />
                       </td>
                       <td style={{ whiteSpace: "normal", minWidth: 200 }}>
                         {a.evidence.probable_cause}
@@ -218,15 +214,16 @@ function Finding({ anomaly: a, data }: { anomaly: Anomaly; data: Workspace }) {
                 <dd>
                   <Badge>{a.evidence.inspection_priority}</Badge>
                 </dd>
-                <dt>Risk probability at detection</dt>
+                <dt>Risk Score</dt>
                 <dd>
-                  {number(
-                    a.evidence.review_probability == null
-                      ? null
-                      : a.evidence.review_probability * 100,
-                    "%",
-                  )}
+                  <RiskScore info={a.evidence} />
                 </dd>
+                {a.evidence.review_probability != null && (
+                  <>
+                    <dt>Raw ML model probability</dt>
+                    <dd>{number(a.evidence.review_probability * 100, "%")}</dd>
+                  </>
+                )}
                 <dt>Recommended next step</dt>
                 <dd>{a.evidence.recommended_action}</dd>
               </dl>

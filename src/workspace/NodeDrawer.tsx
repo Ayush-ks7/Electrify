@@ -47,8 +47,25 @@ export function NodeDrawer({
             <dd>
               <Badge>{risk(consumer)}</Badge>
             </dd>
-            <dt>Risk Score · model review probability</dt>
+            <dt>
+              Risk Score{" "}
+              {consumer.investigation?.simulated
+                ? "(simulation)"
+                : "· model review score"}
+            </dt>
             <dd><RiskScore info={consumer.investigation} /></dd>
+            {consumer.investigation?.simulated &&
+              consumer.investigation?.review_probability != null && (
+                <>
+                  <dt>Raw ML model probability</dt>
+                  <dd>
+                    {number(
+                      consumer.investigation.review_probability * 100,
+                      "%",
+                    )}
+                  </dd>
+                </>
+              )}
             <dt>Anomaly status</dt>
             <dd>{status(consumer)}</dd>
             <dt>Likely cause</dt>
