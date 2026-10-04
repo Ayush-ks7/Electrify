@@ -1,109 +1,65 @@
-# Simulation implementation and validation
+# Simulation audit and validation — 4 October 2026
 
-Validated on 2026-10-03 against the local Windows workspace. Tests use temporary databases and the real locked model; the developer's running database was not reset or seeded by validation. No commits or pushes were made.
+Scope: stabilize the existing implementation. The current request explicitly authorizes simulation/frontend fixes beyond the historical Backend v1 scope in AGENTS.md. No model artifact, AI/ML source, feature calculation, scenario category, case status, feeder model or dependency was added or changed. Existing unrelated workspace changes were preserved.
 
-## Results
+## Audit and root causes
 
-| Check | Result |
-| --- | --- |
-| Existing + new backend tests: `.venv/Scripts/python.exe -m pytest backend/tests -q` | **48 passed** (41 existing, 7 simulation tests) |
-| Existing AI/ML tests: run `../../.venv/Scripts/python.exe -m pytest -q` in `ai_ml/Electrify_AI_ML_Final` | **11 passed** |
-| Frontend type-check: `npm run typecheck` | **Passed** |
-| Frontend lint: `npm run lint` | **Passed**, 0 errors, 18 warnings in pre-existing code |
-| Frontend build: `npm run build` | **Passed**; existing large-bundle warning (~751 kB main JS, ~224 kB gzip) |
-| Existing frontend tests: `npm test` | **8 passed** |
-| Python import/compile: `python -m compileall -q backend/app backend/tests scripts/smoke_simulation.py` | **Passed** |
-| Existing real-model E2E: `python backend/scripts/smoke.py` | **Passed**, 8 endpoints, 1,034 history days, stored rescore matches, probability `0.004550805063616289` |
-| Browser/runtime E2E: `python scripts/smoke_simulation.py` | **Passed**, 0 browser errors, 0 failed browser requests |
-| Alembic migration/schema parity | **Passed** as part of backend tests, including upgrade, schema comparison, downgrade |
-| `git diff --check` | **Passed**; Git emits platform line-ending notices, no whitespace errors |
-| Locked AI/ML changes | **None**; model Git blob matches HEAD, and no files under `ai_ml/` changed |
+Traced `Simulation.tsx` → workspace hooks/service → simulation API/schema → persisted `SimulationStream` → hourly telemetry/daily history → `ScoringService` → `AIMLService` → locked `RiskService` → `InvestigationService` → workspace projection → Overview, consumer table/detail, node drawer, anomalies and cases. Also reviewed shell polling, topology, data quality, migrations, generic consumer/scoring routes, configuration and existing tests.
 
-Python tests report the existing Starlette/AnyIO deprecation warning. Node's test runner reports its experimental TypeScript-transform warning. Lint warnings concern unused declarations in old sample components and existing React effect/purity patterns; none concern the new simulator or investigation components. They are recorded rather than suppressed. The prior `smoke_frontend.py` script targets the old tab/sample-screen architecture; its shared server helpers are reused by the new complete runtime script, while its obsolete screen assertions were not run or rewritten.
+- Scenario changes retained the prior run's partial-day totals, missing flag, completed history, predictions and latest telemetry. A change from outage to normal could produce a missing normal day. Each changed target now returns to its original baseline with a new run ID.
+- Randomness depended on generated-reading count, making the waveform depend on speed/tick segmentation. It now depends on source/date/hour; scenario constraints are applied after noise. Telemetry records scenario and run provenance.
+- Baseline scores were absent; automatic scoring ran only after the first completed day and every seven days thereafter. An arbitrary 30-observed-day gate suppressed otherwise supported scoring. Initialization and each completed day now use the existing locked model, with the existing ML input validation. Slow clocks retain the previous completed-history score. Scoring failures remain explicit and retryable.
+- Consumers showed operational priority instead of numeric probability, and the node drawer omitted the score. A shared presentation component now shows the backend probability in the table, details, drawer and simulation status table, separately from operational priority.
+- Transformer input stayed at baseline during legitimate high load, producing contradictory negative residuals. Supply is now accumulated from generated load before reported meter faults/under-reporting, then aggregated through the existing topology. It never enters model inference.
+- Unfiled findings froze their first (sometimes unscored) snapshot and survived reset. They now track evolving evidence and are cleared on reset/switch or recovery. Opening a case freezes evidence; human statuses and notes survive reset.
+- Reset used stale client-side stream IDs and merely invalidated caches. Controls now resolve all owned streams on the server. Queries are canceled before and after mutations, polling is suspended during controls, and all workspace window caches are reset. Reset is idempotent, including repeated explicit IDs already removed.
+- Manual history scoring and workspace reads could overlap reset. They now share the simulation lifecycle lock, so a scoring response cannot recreate a deleted simulation copy and snapshots cannot straddle reset.
+- A successful manual full-history retry now clears the simulation scoring error and refreshes unfiled evidence, including when generation is stopped.
+- Reset completion could overwrite a rapidly changed draft target. Draft reset now occurs before controls re-enable. Target/scenario controls are disabled during lifecycle mutations. The status table is constrained to its grid column on mobile.
 
-Verified locked artifact checksums:
+## Implementation areas
 
-```text
-SHA-256: 9d3e2853e71d01d80f051520d858fa27d07f0026d1ffa8e8efb97ba23e28ee02
-Git blob (working file and HEAD): 12cd1fadecfa89e668786abb50c2981a07f85e8a
+- Backend: `services/simulation_service.py`, `investigation_service.py`, `operations_service.py`; routes `operations.py`, `scoring.py`.
+- Frontend: `workspace/hooks.ts`, `Simulation.tsx`, `Shell.tsx`, `RiskScore.tsx`, `Consumers.tsx`, `NodeDrawer.tsx`, `Investigations.tsx`, `service.ts`; `types/simulation.ts`, `index.css`.
+- Verification: `backend/tests/test_simulation.py`, `test_simulation_regression.py`; `scripts/smoke_simulation.py`, `smoke_workspace.py`.
+
+See [mode → telemetry → entity → detection → UI mapping](SIMULATION_MODE.md#existing-scenario-mapping). All six existing modes are represented: normal, legitimate_abnormal, sudden_drop, tampering, meter_fault and communication_failure. Both reduction modes still share the existing operational detector. No probability is forced to match a scenario label.
+
+## Verification commands
+
+```powershell
+.venv/Scripts/python.exe -m pytest backend/tests -q -p no:cacheprovider
+.venv/Scripts/python.exe -m pytest ai_ml/Electrify_AI_ML_Final/tests -q -p no:cacheprovider
+.venv/Scripts/python.exe -m compileall -q backend/app backend/tests scripts
+npm test
+npm run typecheck
+npm run build
+npm run lint
+.venv/Scripts/python.exe scripts/smoke_simulation.py
+.venv/Scripts/python.exe scripts/smoke_workspace.py
 ```
 
-## Runtime and visual review
+The backend regressions exercise all 36 ordered scenario pairs (including unchanged Start), all six generated conditions, pause/stop/reset, original-record isolation, daily scores through the real model, deterministic repeats, partial-day segmentation, supply balance, anomaly evolution, preserved case evidence, one-stream failure isolation, model-failure recovery and reset during manual scoring. An assertion compares the actual UI scenario configuration with the backend literal contract.
 
-The Playwright run launches its own FastAPI and Vite processes, seeds a real persisted source consumer in a temporary database, and operates the real UI in Chromium. It verifies:
+The simulation browser suite uses real FastAPI, the real model and a temporary database. It checks six modes through SPA navigation, consumer table/detail score visibility, Overview/anomaly updates, stop, repeated reset/start cycles, an intentionally delayed old response, an injected reset failure and all 20 meters' model scores. The workspace suite checks the broader UI, 3D/2D drawers, case creation/status/notes, persistence, responsive views and backend-outage retry. Neither suite alters the developer database.
 
-- Selecting an existing consumer creates a demo copy; realistic minute telemetry arrives without a frontend generation timer.
-- Pause prevents cursor advancement; Stop preserves evidence; Reset deletes only owned copies.
-- Five independent streams run simultaneously with different scenarios.
-- Outage voltage/current/power/energy remain null, including complete daily nulls (also asserted directly in backend tests).
-- Fault telemetry presents “Meter malfunction suspected,” independently of the model's screening flag.
-- Persistent reduction produces an unverified tampering hypothesis, while temporary load context is explicitly supplied by the simulator.
-- Dashboard rows and selected history update via polling without document reload.
-- Consumer details show actual saved model explanation signals; manual stored-history rescoring still works for simulation and original consumers.
-- Case status persists in the database and survives subsequent scoring; restart recovery is covered by backend tests.
-- CORS preflight succeeds; browser requests and console contain no runtime/API errors in the successful run.
-- Mobile controls fit a 390×844 viewport; desktop dashboard, detail and control screenshots were visually inspected for consistency with the existing style.
-- Cases, Anomalies and Alerts redirect to the same live investigations. System/model diagnostics still show the locked model version.
+## Recorded results
 
-The first browser run exposed a reset/polling race that briefly fetched deleted demo history. Controls now cancel/suspend reads and refresh consumer membership before history polling resumes. Subsequent full browser runs passed without 404s or failed requests.
+- Full backend suite: **102 passed**. Following the final manual-score recovery fix, the API suite, reset/scoring concurrency regression and new manual-recovery regression were rerun: **31 passed** (103 distinct backend tests exercised in total).
+- Existing AI/ML tests: **11 passed**, using the actual locked artifact. No AI/ML files changed.
+- Frontend Node tests: **9 passed**. Type checking, production build and lint passed.
+- Python compile checks and backend/`RiskService` imports passed. A Windows sandbox process-launch failure on a repeated compile check was resolved by rerunning with the existing Python execution approval.
+- Simulation browser regressions: **passed**, all six modes, real numeric probabilities and all 20 initialized meters; zero recorded runtime/console errors. Repeated resets, scenario switches, stop, delayed stale-response rejection and reset-failure retry passed.
+- Wider workspace browser acceptance: **passed**, including case lifecycle/notes, model integration, responsive simulation layout, 3D/2D drawers, exports, reduced motion and intentional backend-outage retry; zero recorded runtime errors.
+- Reports/screenshots/logs: `logs/simulation-validation/` and `logs/workspace-validation/` (local ignored artifacts). Temporary server processes and databases were cleaned up by the suites.
+- Non-blocking existing warnings: Starlette/AnyIO and Three.js deprecations, Node experimental TypeScript-transform notice, and Vite large-chunk warning. No dependencies were added to address unrelated warnings.
 
-Generated, ignored artifacts:
+## Limits
 
-- `logs/simulation-validation/report.json`
-- `logs/simulation-validation/dashboard.png`
-- `logs/simulation-validation/consumer-detail.png`
-- `logs/simulation-validation/controls.png`
-- `logs/simulation-validation/mobile-controls.png`
-- `logs/simulation-validation/backend.log`, `vite.log`
-
-Additional backend assertions cover: real full-history inference and seven-day score cadence; partial days and speed changes; recorded zero versus missing readings; temporary-load recovery; model failure retaining telemetry and later retrying; atomic invalid multi-target starts; duplicate source/copy aliases; selective reset ownership checks; the 90-day stop limit; API-key protection; and restart-persisted status with paused streams.
-
-## Files changed by this task
-
-The workspace already contained uncommitted frontend/backend integration work. The following is the complete **task-specific** manifest (31 files); existing integration edits were built upon, not reverted.
-
-| File | Change |
-| --- | --- |
-| `README.md` | Link to simulation setup |
-| `backend/README.md` | Extension/startup/migration guidance |
-| `backend/app/main.py` | Scheduler lifecycle and API registration |
-| `backend/app/db/models.py` | Stream, telemetry and investigation persistence |
-| `backend/app/api/routes/simulation.py` | New control, investigation and telemetry endpoints |
-| `backend/app/schemas/simulation.py` | Strict scenario/control/status request validation |
-| `backend/app/services/simulation_service.py` | Backend generation, aggregation, state and scoring scheduling |
-| `backend/app/services/investigation_service.py` | Unified evidence, rules, saved prediction and case-status projection |
-| `backend/migrations/versions/0002_simulation.py` | Additive schema migration |
-| `backend/tests/test_migrations.py` | Updated schema expectations |
-| `backend/tests/test_simulation.py` | Seven behavioral/integration tests |
-| `src/App.tsx` | Consolidated routes and legacy redirects |
-| `src/components/cards/InvestigationSummary.tsx` | Shared context, status, evidence and explanation component |
-| `src/components/charts/ConsumptionTrendChart.tsx` | Honest pre-simulation baseline label |
-| `src/components/charts/LiveMeterChart.tsx` | Live interval power chart with missing gaps |
-| `src/components/layout/AppShell.tsx` | Simulator entry point and live investigation alert count |
-| `src/components/layout/NotificationDrawer.tsx` | Backend-backed unified alerts instead of sample notifications |
-| `src/components/layout/Sidebar.tsx` | Overview/Investigations/System navigation |
-| `src/components/layout/SimulationPanel.tsx` | Scenario, consumer, speed and lifecycle controls |
-| `src/components/tables/InvestigationTable.tsx` | Shared searchable investigation queue |
-| `src/components/ui/modal.tsx` | Accessible dialog label, keyboard focus trap and focus restoration |
-| `src/hooks/live.ts` | Suspend history queries while simulation controls execute |
-| `src/hooks/simulation.ts` | Shared polling and case-status mutation hooks |
-| `src/pages/Dashboard/index.tsx` | Unified live queue, current telemetry and baseline/history comparison |
-| `src/pages/Consumers/index.tsx` | Same unified queue in the directory |
-| `src/pages/ConsumerDetail/index.tsx` | One consolidated investigation detail view |
-| `src/services/simulation.ts` | Typed simulation/investigation API client |
-| `src/types/simulation.ts` | Explicit transport types and scenario/status options |
-| `scripts/smoke_simulation.py` | Isolated real browser/backend/model runtime validation |
-| `docs/SIMULATION_MODE.md` | Architecture, API, demo, provenance, scope and limitations |
-| `docs/SIMULATION_VALIDATION.md` | This report and file manifest |
-
-Pre-existing dirty/untracked paths **not edited by this task**: `package.json`, `src/components/layout/GlobalSearchModal.tsx`, `src/components/layout/Topbar.tsx`, `src/components/tables/ConsumerTable.tsx`, `src/hooks/index.ts`, `src/pages/System/index.tsx`, `src/services/index.ts`, `src/types/index.ts`, `src/utils/formatters.ts`, `vite.config.ts`, `.env.example`, `docs/FRONTEND_BACKEND_INTEGRATION.md`, `scripts/smoke_frontend.py`, `src/components/common/QueryState.tsx`, `src/services/api.ts`, `src/types/api.ts`, `src/utils/liveData.ts`, and `tests/frontend-api.test.mjs`.
-
-Git diff and status were inspected, including the additive database changes, frontend navigation changes, new services and test files. The repository remains uncommitted.
-
-## Remaining requirements and limitations
-
-No fake model outputs were introduced. Generated telemetry and demo history are synthetic; legitimate-load context is supplied by the simulator; the top bar still contains the pre-existing static Demo profile. Legacy sample page source remains unused.
-
-Calibrated cause confidence, trained cause classification, independent anomaly score, validated inspection-priority engine, physical IoT/MQTT ingestion, category/feeder/transformer metadata, peer/grid loss analytics, workflow audit/assignment/notes, distributed scheduling, and production alert delivery remain unsupported. Null numeric confidence/anomaly fields and the investigation service provide explicit extension points. The present cause/priority/action layer uses documented rules and context, not ML classification.
-
-Run one backend worker, at most 20 demo copies, and at most 90 virtual days per copy. Restart pauses streams; reset starts fresh copies. Scoring only sees completed daily histories and runs periodically, so it does not guarantee an immediate theft flag for short synthetic episodes. All probabilities remain review signals. See [SIMULATION_MODE.md](SIMULATION_MODE.md) for exact semantics and startup commands.
+- Single backend worker/process and one shared simulated territory; multiple tabs control the same streams. This is not a distributed scheduler or isolated multi-user simulator.
+- All numeric scores are real full-history model results. They are not instantaneous anomaly scores, may remain similar between days, and need not rise for an operational fault/outage. If the model is unavailable, the UI retains a labeled previous score or explicitly reports unavailability; no fake numeric fallback exists.
+- An initialized consumer has a model score; untouched illustrative preview consumers honestly remain “Not scored.” Selecting Whole Locality initializes and scores all 20 meters. Generic stored consumer APIs remain separate from the fixed locality projection.
+- Independent stream clocks can produce genuinely missing dates in the shared window, especially after switching only one target. Latest consumer usage comes from that consumer's actual latest completed day, not another meter's calendar cursor. Missing data is never filled with zero.
+- High Consumption lasts four simulated days and then recovers by design. The two drop modes share reduction detection; causes remain unverified. Meter Fault's implausible reported values represent faulty measurements, not the actual supply.
+- Human-created cases and their evidence intentionally survive reset, so historical open-case counters can remain. Reset removes all generation and unfiled simulation events.
+- No exhaustive cross-browser, distributed deployment or long-duration load testing is claimed.
