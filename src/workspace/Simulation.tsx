@@ -235,7 +235,21 @@ export default function Simulation() {
                           {s.scenario === "legitimate_abnormal" && s.completed_days >= 4 && <span className="subcell">Recovery phase</span>}
                         </td>
                         <td>{s.state}<span className="subcell">{s.cursor} · {s.completed_days} completed days</span></td>
-                        <td><RiskScore info={data.consumers.find((c) => c.id === s.source_consumer_id)?.investigation ?? null} /></td>
+                        <td>
+                          {(() => {
+                            const c = data.consumers.find(
+                              (c) => c.id === s.source_consumer_id,
+                            );
+                            const info = c?.investigation
+                              ? {
+                                  ...c.investigation,
+                                  scenario: s.scenario,
+                                  simulated: true,
+                                }
+                              : null;
+                            return <RiskScore info={info} />;
+                          })()}
+                        </td>
                       </tr>)}</tbody>
                     </table>
                   </div>}

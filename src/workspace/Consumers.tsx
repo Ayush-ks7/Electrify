@@ -143,7 +143,11 @@ export function Consumers() {
                         <td>{number(latest(c), "kWh/day")}</td>
                         <td>
                           <RiskScore info={c.investigation} />
-                          <span className="subcell">Model review probability</span>
+                          <span className="subcell">
+                            {c.investigation?.simulated
+                              ? "Simulation risk score"
+                              : "Model review score"}
+                          </span>
                           <Badge>{risk(c)}</Badge>
                         </td>
                         <td>
@@ -389,10 +393,19 @@ function ConsumerWorkspace({
                   </div>
                 )}
                 <dl className="detail-list">
-                  <dt>Risk Score · model review probability</dt>
+                  <dt>
+                    Risk Score{" "}
+                    {info?.simulated ? "(simulation)" : "· model review score"}
+                  </dt>
                   <dd>
                     <RiskScore info={info} />
                   </dd>
+                  {info?.simulated && info?.review_probability != null && (
+                    <>
+                      <dt>Raw ML model probability</dt>
+                      <dd>{number(info.review_probability * 100, "%")}</dd>
+                    </>
+                  )}
                   <dt>Saved threshold</dt>
                   <dd>
                     {number(
