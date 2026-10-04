@@ -60,3 +60,20 @@ class Investigation(Base):
     consumer_id: Mapped[str] = mapped_column(ForeignKey("consumers.consumer_id"), primary_key=True)
     status: Mapped[str] = mapped_column(String(32), default="Requires Review")
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now)
+
+
+class Finding(Base):
+    __tablename__ = "findings"
+    id: Mapped[str] = mapped_column(String(64), primary_key=True)
+    consumer_id: Mapped[str] = mapped_column(String(128))
+    detected_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now)
+    snapshot: Mapped[dict] = mapped_column(JSON)
+
+
+class Case(Base):
+    __tablename__ = "cases"
+    id: Mapped[str] = mapped_column(String(64), primary_key=True)
+    anomaly_id: Mapped[str] = mapped_column(ForeignKey("findings.id"), unique=True)
+    status: Mapped[str] = mapped_column(String(32), default="Open")
+    events: Mapped[list] = mapped_column(JSON, default=list)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now)

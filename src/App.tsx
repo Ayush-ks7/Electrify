@@ -1,44 +1,77 @@
-import React from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { AppShell } from './components/layout/AppShell';
-import { Dashboard } from './pages/Dashboard';
-import { Consumers } from './pages/Consumers';
-import { ConsumerDetail } from './pages/ConsumerDetail';
-import { System } from './pages/System';
-
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      staleTime: 1000 * 60 * 5, // 5 minutes
-      refetchOnWindowFocus: false,
-    },
-  },
+﻿import { lazy, Suspense } from "react";
+import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import Shell from "./workspace/Shell";
+import { Overview } from "./workspace/Overview";
+const Locality = lazy(() => import("./workspace/Locality"));
+const Consumers = lazy(() =>
+  import("./workspace/Consumers").then((m) => ({ default: m.Consumers })),
+);
+const ConsumerDetail = lazy(() =>
+  import("./workspace/Consumers").then((m) => ({ default: m.ConsumerDetail })),
+);
+const Anomalies = lazy(() =>
+  import("./workspace/Investigations").then((m) => ({ default: m.Anomalies })),
+);
+const AnomalyDetail = lazy(() =>
+  import("./workspace/Investigations").then((m) => ({
+    default: m.AnomalyDetail,
+  })),
+);
+const Cases = lazy(() =>
+  import("./workspace/Investigations").then((m) => ({ default: m.Cases })),
+);
+const DataQuality = lazy(() => import("./workspace/DataQuality"));
+const Simulation = lazy(() => import("./workspace/Simulation"));
+const client = new QueryClient({
+  defaultOptions: { queries: { staleTime: 2000, refetchOnWindowFocus: false } },
 });
-
-function App() {
+export default function App() {
   return (
-    <QueryClientProvider client={queryClient}>
+    <QueryClientProvider client={client}>
       <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<AppShell />}>
-            <Route index element={<Navigate to="/dashboard" replace />} />
-            <Route path="dashboard" element={<Dashboard />} />
-            <Route path="consumers" element={<Consumers />} />
-            <Route path="consumers/:id" element={<ConsumerDetail />} />
-            <Route path="anomalies" element={<Navigate to="/consumers" replace />} />
-            <Route path="anomalies/:id" element={<Navigate to="/consumers" replace />} />
-            <Route path="cases" element={<Navigate to="/consumers" replace />} />
-            <Route path="alerts" element={<Navigate to="/consumers" replace />} />
-            <Route path="analytics" element={<Navigate to="/dashboard" replace />} />
-            <Route path="data-quality" element={<Navigate to="/consumers" replace />} />
-            <Route path="system" element={<System />} />
-            <Route path="*" element={<Navigate to="/dashboard" replace />} />
-          </Route>
-        </Routes>
+        <Suspense fallback={<div className="loading">Loading workspace…</div>}>
+          <Routes>
+            <Route element={<Shell />}>
+              <Route index element={<Navigate to="/overview" replace />} />
+              <Route path="overview" element={<Overview />} />
+              <Route path="locality" element={<Locality />} />
+              <Route path="consumers" element={<Consumers />} />
+              <Route path="consumers/:id" element={<ConsumerDetail />} />
+              <Route path="anomalies" element={<Anomalies />} />
+              <Route path="anomalies/:id" element={<AnomalyDetail />} />
+              <Route path="cases" element={<Cases />} />
+              <Route path="data-quality" element={<DataQuality />} />
+              <Route path="simulation" element={<Simulation />} />
+              <Route
+                path="dashboard"
+                element={<Navigate to="/overview" replace />}
+              />
+              <Route
+                path="alerts"
+                element={<Navigate to="/anomalies" replace />}
+              />
+              <Route
+                path="analytics"
+                element={<Navigate to="/overview" replace />}
+              />
+              <Route
+                path="system"
+                element={<Navigate to="/overview" replace />}
+              />
+              <Route
+                path="*"
+                element={
+                  <div className="empty">
+                    <h1>Page not found</h1>
+                    <a href="/overview">Return to Overview</a>
+                  </div>
+                }
+              />
+            </Route>
+          </Routes>
+        </Suspense>
       </BrowserRouter>
     </QueryClientProvider>
   );
 }
-
-export default App;

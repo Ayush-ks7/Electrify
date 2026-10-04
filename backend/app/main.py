@@ -11,7 +11,7 @@ from sqlalchemy import inspect
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 
 from .api.dependencies import require_api_key
-from .api.routes import consumers, health, scoring, simulation
+from .api.routes import consumers, health, scoring, simulation, operations
 from .core.config import Settings
 from .core.errors import ServiceError
 from .core.logging import configure_logging
@@ -101,7 +101,7 @@ def create_app(settings: Settings | None = None, ai_ml: AIMLService | None = Non
         return response
 
     app.include_router(health.router)
-    for router in (health.model_router, scoring.router, consumers.router, simulation.router):
+    for router in (health.model_router, scoring.router, consumers.router, simulation.router, operations.router):
         app.include_router(router, prefix="/api/v1", dependencies=[Depends(require_api_key)])
     return app
 

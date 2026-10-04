@@ -13,7 +13,7 @@ def test_initial_migration_and_schema_match(tmp_path, monkeypatch):
     engine = create_engine(url)
     try:
         assert set(inspect(engine).get_table_names()) == {"alembic_version", "consumers", "daily_readings", "predictions",
-                                                        "simulation_streams", "meter_readings", "investigations"}
+                                                        "simulation_streams", "meter_readings", "investigations", "findings", "cases"}
         command.check(config)
     finally:
         engine.dispose()

@@ -6,12 +6,12 @@ from sqlalchemy import select
 from app.db.models import Investigation, MeterReading, Prediction, SimulationStream
 from app.main import create_app
 
-SCENARIOS = ["normal", "tampering", "meter_fault", "communication_failure", "legitimate_abnormal"]
+SCENARIOS = ["normal", "tampering", "meter_fault", "communication_failure", "legitimate_abnormal", "sudden_drop"]
 
 
 def start(client, targets=None, speed="very_fast"):
     response = client.post("/api/v1/simulation/start", json={"targets": targets or [
-        {"consumer_id": f"demo:{i+1}", "scenario": scenario} for i, scenario in enumerate(SCENARIOS)], "speed": speed})
+        {"consumer_id": f"C{i+1:02d}", "scenario": scenario} for i, scenario in enumerate(SCENARIOS)], "speed": speed})
     assert response.status_code == 200, response.text
     return response.json()["streams"]
 
@@ -55,7 +55,7 @@ def test_mixed_scenarios_real_model_history_and_status(client, app):
     assert abs(recovered["deviation_pct"]) < 10
     with app.state.database.sessions() as session:
         predictions = list(session.scalars(select(Prediction).where(Prediction.consumer_id == cid)))
-        assert len(predictions) == 2  # first completed day, then day eight
+        assert len(predictions) == 9  # baseline plus every completed day
         assert predictions[-1].period_end > predictions[0].period_end
         assert session.get(Investigation, ids["meter_fault"]).status == "Requires Review"
 
@@ -77,8 +77,8 @@ def test_partial_days_speed_change_pause_stop_reset_and_original_isolation(clien
     start(client, [{"consumer_id": cid, "scenario": "normal"}])
     sim.tick(force=True)
     history = client.get(f"/api/v1/consumers/{cid}/history").json()
-    assert history["total"] == 5 and history["readings"][-1]["consumption"] is None
-    assert "Insufficient history" in sim.status()["streams"][0]["score_state"]
+    assert history["total"] == 5 and history["readings"][-1]["consumption"] > 0
+    assert "Scored" in sim.status()["streams"][0]["score_state"]
     assert client.post("/api/v1/simulation/stop", json={}).status_code == 200
     before = sim.status()
     sim.tick(force=True)
@@ -95,7 +95,7 @@ def test_partial_days_speed_change_pause_stop_reset_and_original_isolation(clien
 
 def test_restart_pauses_persisted_streams_and_keeps_status(client, app, ai_ml):
     app.state.simulation.close()
-    cid = start(client, [{"consumer_id": "demo:1", "scenario": "meter_fault"}])[0]["consumer_id"]
+    cid = start(client, [{"consumer_id": "C01", "scenario": "meter_fault"}])[0]["consumer_id"]
     app.state.simulation.tick(force=True)
     client.post(f"/api/v1/investigations/{cid}/status", json={"status": "Resolved"})
     restarted = create_app(app.state.settings, ai_ml=ai_ml)
@@ -106,7 +106,7 @@ def test_restart_pauses_persisted_streams_and_keeps_status(client, app, ai_ml):
 
 
 def test_scheduler_runs_without_browser_and_controls_are_validated(client, app):
-    cid = start(client, [{"consumer_id": "demo:1", "scenario": "normal"}])[0]["consumer_id"]
+    cid = start(client, [{"consumer_id": "C01", "scenario": "normal"}])[0]["consumer_id"]
     deadline = time.monotonic() + 15
     while time.monotonic() < deadline:
         state = app.state.simulation.status()["streams"][0]
@@ -114,39 +114,41 @@ def test_scheduler_runs_without_browser_and_controls_are_validated(client, app):
             break
         time.sleep(.1)
     assert state["completed_days"] >= 2
-    assert client.post("/api/v1/simulation/start", json={"targets": [{"consumer_id": "demo:2", "scenario": "fake"}]}).status_code == 422
-    assert client.post("/api/v1/simulation/start", json={"targets": [{"consumer_id": "demo:2", "scenario": "normal"}] * 2}).status_code == 422
+    assert client.post("/api/v1/simulation/start", json={"targets": [{"consumer_id": "C02", "scenario": "fake"}]}).status_code == 422
+    assert client.post("/api/v1/simulation/start", json={"targets": [{"consumer_id": "C02", "scenario": "normal"}] * 2}).status_code == 422
     assert client.post(f"/api/v1/investigations/{cid}/status", json={"status": "Proven theft"}).status_code == 422
     # Transactional start: an invalid second target leaves no partial demo copy.
-    assert client.post("/api/v1/simulation/start", json={"targets": [{"consumer_id": "demo:2", "scenario": "normal"}, {"consumer_id": "absent", "scenario": "normal"}]}).status_code == 404
+    assert client.post("/api/v1/simulation/start", json={"targets": [{"consumer_id": "C02", "scenario": "normal"}, {"consumer_id": "absent", "scenario": "normal"}]}).status_code == 404
     assert len(app.state.simulation.status()["streams"]) == 1
 
 
 def test_scoring_failure_retains_telemetry_and_retries(client, app, monkeypatch):
     from app.core.errors import ServiceError
     app.state.simulation.close()
-    cid = start(client, [{"consumer_id": "demo:1", "scenario": "normal"}])[0]["consumer_id"]
+    cid = start(client, [{"consumer_id": "C01", "scenario": "normal"}])[0]["consumer_id"]
     def fail(*args, **kwargs):
         raise ServiceError(503, "MODEL_UNAVAILABLE", "AI/ML model is unavailable.")
     with monkeypatch.context() as patch:
         patch.setattr(app.state.ai_ml, "score_histories", fail)
         app.state.simulation.tick(force=True)
     row = client.get(f"/api/v1/investigations/{cid}").json()
-    assert row["latest_reading"] and row["prediction"] is None and row["last_error"]
+    assert row["latest_reading"] and row["prediction"] and row["last_error"]
+    old_end = row["prediction"]["period_end"]
     app.state.simulation.tick(force=True)
     row = client.get(f"/api/v1/investigations/{cid}").json()
     assert row["prediction"] and row["last_error"] is None
+    assert row["prediction"]["period_end"] > old_end
 
 
 def test_simulation_limits_aliases_and_selective_reset(client, app):
     app.state.simulation.close()
-    streams = start(client, [{"consumer_id": "demo:1", "scenario": "normal"},
-                             {"consumer_id": "demo:2", "scenario": "meter_fault"}])
-    cid = next(s["consumer_id"] for s in streams if s["source_consumer_id"] == "demo:1")
+    streams = start(client, [{"consumer_id": "C01", "scenario": "normal"},
+                             {"consumer_id": "C02", "scenario": "meter_fault"}])
+    cid = next(s["consumer_id"] for s in streams if s["source_consumer_id"] == "C01")
     before = app.state.simulation.status()
     # Source ID and copy ID cannot mutate the same stream twice in one request.
     response = client.post("/api/v1/simulation/start", json={"targets": [
-        {"consumer_id": "demo:1", "scenario": "tampering"}, {"consumer_id": cid, "scenario": "normal"}]})
+        {"consumer_id": "C01", "scenario": "tampering"}, {"consumer_id": cid, "scenario": "normal"}]})
     assert response.status_code == 422 and app.state.simulation.status() == before
     with app.state.database.sessions() as session:
         stream = session.get(SimulationStream, cid)

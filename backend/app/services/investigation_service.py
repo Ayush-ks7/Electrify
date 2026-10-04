@@ -47,7 +47,7 @@ class InvestigationService:
         if deviation is not None:
             evidence.append(f"Latest completed day differs by {deviation:+.1f}% from that baseline.")
         if signals.get("communication_status") == "offline":
-            cause, confidence, priority = "Communication interruption", "Telemetry status evidence (not calibrated)", "High"
+            cause, confidence, priority = "Meter Data Transmission Failure", "Telemetry status evidence (not calibrated)", "High"
             action = "Restore communication and verify missing intervals; do not infer theft from an outage."
             evidence.append("No meter payload received: voltage, current, power and consumption are null.")
             review = True
@@ -79,6 +79,7 @@ class InvestigationService:
         return {
             "consumer_id": cid, "simulated": stream is not None,
             "source_consumer_id": config.get("source_consumer_id"),
+            "run_id": config.get("run_id"),
             "provenance": config.get("provenance"), "scenario": config.get("scenario"),
             "stream_state": config.get("state"), "simulation_time": config.get("cursor"),
             "baseline_kwh": baseline, "latest_daily_kwh": latest_daily,
